@@ -43,6 +43,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)updateNavigationBarVisibilityAnimated:(BOOL)animated;
 
 #if !TARGET_OS_TV
+- (void)updateToolbarVisibilityAnimated:(BOOL)animated;
+
 - (void)updateBackButtonMenuEnabled;
 
 - (void)clearAppliedBackButtonConfig;

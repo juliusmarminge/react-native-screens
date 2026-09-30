@@ -18,6 +18,8 @@ RNSHeaderItemPlacement convert(react::RNSHeaderItemIOSPlacement placement)
       return RNSHeaderItemPlacementLeading;
     case react::RNSHeaderItemIOSPlacement::Trailing:
       return RNSHeaderItemPlacementTrailing;
+    case react::RNSHeaderItemIOSPlacement::Toolbar:
+      return RNSHeaderItemPlacementToolbar;
     case react::RNSHeaderItemIOSPlacement::Title:
       return RNSHeaderItemPlacementTitle;
     case react::RNSHeaderItemIOSPlacement::Subtitle:
@@ -35,6 +37,8 @@ RNSHeaderItemSpacerPlacement convert(react::RNSHeaderItemSpacerIOSPlacement plac
       return RNSHeaderItemSpacerPlacementLeading;
     case react::RNSHeaderItemSpacerIOSPlacement::Trailing:
       return RNSHeaderItemSpacerPlacementTrailing;
+    case react::RNSHeaderItemSpacerIOSPlacement::Toolbar:
+      return RNSHeaderItemSpacerPlacementToolbar;
   }
 }
 
