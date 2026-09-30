@@ -8,7 +8,7 @@ import type {
   SplitHostProps,
   SplitBehavior,
 } from './SplitHost.types';
-import SplitScreen from './SplitScreen';
+import SplitScreen, { SplitColumnIndexContext } from './SplitScreen';
 
 type NativeRef = React.ComponentRef<typeof SplitHostNativeComponent>;
 
@@ -93,6 +93,22 @@ function SplitHost({ ref, ...props }: SplitHostProps) {
     child => child.type === SplitScreen.Inspector,
   );
 
+  // Every column learns its index through context, so that its screens can be routed to the right column natively.
+  let columnIndex = 0;
+  const indexedChildren = children.map(child => {
+    if (React.isValidElement(child) && child.type === SplitScreen.Column) {
+      const index = columnIndex++;
+      return (
+        <SplitColumnIndexContext.Provider
+          key={child.key ?? `column-${index}`}
+          value={index}>
+          {child}
+        </SplitColumnIndexContext.Provider>
+      );
+    }
+    return child;
+  });
+
   return (
     <SplitHostNativeComponent
       ref={nativeRef}
@@ -102,7 +118,7 @@ function SplitHost({ ref, ...props }: SplitHostProps) {
       key={`columns-${columns.length}-inspectors-${inspectors.length}`}
       {...props}
       style={styles.container}>
-      {props.children}
+      {indexedChildren}
     </SplitHostNativeComponent>
   );
 }

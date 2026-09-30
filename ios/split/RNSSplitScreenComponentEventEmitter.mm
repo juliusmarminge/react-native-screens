@@ -55,4 +55,15 @@
   _reactEventEmitter = emitter;
 }
 
+- (BOOL)emitOnDismissWithNativeDismiss:(BOOL)isNativeDismiss
+{
+  if (_reactEventEmitter != nullptr) {
+    _reactEventEmitter->onDismiss({.isNativeDismiss = static_cast<bool>(isNativeDismiss)});
+    return YES;
+  } else {
+    RCTLogWarn(@"[RNScreens] Skipped OnDismiss event emission due to nullish emitter");
+    return NO;
+  }
+}
+
 @end

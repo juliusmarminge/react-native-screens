@@ -6,6 +6,8 @@ const NOOP = () => {
 };
 
 const Column = NOOP;
+const Stack = NOOP;
+const Screen = NOOP;
 const Inspector = NOOP;
 
-export default { Column, Inspector };
+export default { Column, Stack, Screen, Inspector };

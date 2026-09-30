@@ -7,11 +7,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class RNSStackScreenComponentView;
 @class RNSStackController;
-@class RNSStackScreenHeaderCoordinator;
+@class RNSHeaderCoordinator;
 
 @interface RNSStackScreenController : UIViewController <RNSContainerItem>
 
-@property (nonatomic, strong, readonly, nonnull) RNSStackScreenHeaderCoordinator *headerCoordinator;
+@property (nonatomic, strong, readonly, nonnull) RNSHeaderCoordinator *headerCoordinator;
 
 - (instancetype)initWithComponentView:(RNSStackScreenComponentView *)componentView;
 

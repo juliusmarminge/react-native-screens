@@ -6,7 +6,7 @@
 #import <react/renderer/components/rnscreens/RCTComponentViewHelpers.h>
 
 #import "RNSContainerHelpers.h"
-#import "RNSConversions-SplitView.h"
+#import "RNSConversions.h"
 #import "RNSDefines.h"
 #import "RNSSplitHostComponentEventEmitter.h"
 #import "RNSSplitHostController.h"
@@ -30,7 +30,6 @@ static const CGFloat epsilon = 1e-6;
   RNSSplitHostController *_Nonnull _controller;
   NSMutableArray<RNSSplitScreenComponentView *> *_Nonnull _reactSubviews;
 
-  bool _hasModifiedReactSubviewsInCurrentTransaction;
   bool _needsSplitAppearanceUpdate;
   bool _needsSplitSecondaryScreenNavBarUpdate;
   bool _needsSplitDisplayModeUpdate;
@@ -53,7 +52,6 @@ static const CGFloat epsilon = 1e-6;
 
   _reactEventEmitter = [RNSSplitHostComponentEventEmitter new];
 
-  _hasModifiedReactSubviewsInCurrentTransaction = false;
   _needsSplitAppearanceUpdate = false;
   _needsSplitSecondaryScreenNavBarUpdate = false;
   _needsSplitDisplayModeUpdate = false;
@@ -103,13 +101,42 @@ static const CGFloat epsilon = 1e-6;
 
 - (int)getNumberOfColumns
 {
-  int numberOfColumns = 0;
-  for (RNSSplitScreenComponentView *component in _reactSubviews) {
-    if (component.columnType == RNSSplitScreenColumnTypeColumn) {
-      numberOfColumns++;
+  NSMutableSet<NSNumber *> *columns = [NSMutableSet set];
+  for (RNSSplitScreenComponentView *screen in _reactSubviews) {
+    if (screen.columnType == RNSSplitScreenColumnTypeColumn) {
+      [columns addObject:@(screen.column)];
     }
   }
-  return numberOfColumns;
+  return (int)columns.count;
+}
+
+/** @brief The column a screen belongs to as the host controller sees it: its index, or `-1` for the inspector. */
+- (NSInteger)columnOfScreen:(RNSSplitScreenComponentView *)screen
+{
+  if (screen.columnType == RNSSplitScreenColumnTypeInspector) {
+    return -1;
+  }
+  RCTAssert(screen.column >= 0, @"[RNScreens] Split column screens must carry the index of their column");
+  return screen.column;
+}
+
+- (void)splitScreenDidChangeActivityMode:(RNSSplitScreenComponentView *)screen
+{
+  // Before the controller exists the current value is picked up when the screen is handed over.
+  [_controller screenDidChangeActivityMode:screen inColumn:[self columnOfScreen:screen]];
+}
+
+/** @brief Hands a screen at the given position of `_reactSubviews` over to its column. */
+- (void)routeInsertedScreen:(RNSSplitScreenComponentView *)screen atIndex:(NSInteger)index
+{
+  NSInteger column = [self columnOfScreen:screen];
+  NSInteger indexInColumn = 0;
+  for (NSInteger i = 0; i < index; i++) {
+    if ([self columnOfScreen:_reactSubviews[i]] == column) {
+      indexInColumn++;
+    }
+  }
+  [_controller insertScreen:screen inColumn:column atIndex:indexInColumn];
 }
 
 - (void)setupController
@@ -124,7 +151,11 @@ static const CGFloat epsilon = 1e-6;
     _controller.eventsDelegate = self;
     _controller.appearanceProvider = self;
     _controller.behaviorProvider = self;
-    _controller.columnsProvider = self;
+
+    // Children mount before the host reaches the window, i.e. before the controller exists; hand them over now.
+    [_reactSubviews enumerateObjectsUsingBlock:^(RNSSplitScreenComponentView *screen, NSUInteger index, BOOL *stop) {
+      [self routeInsertedScreen:screen atIndex:(NSInteger)index];
+    }];
   }
 }
 
@@ -168,7 +199,9 @@ RNS_IGNORE_SUPER_CALL_END
   auto *childScreen = static_cast<RNSSplitScreenComponentView *>(childComponentView);
   childScreen.splitHost = self;
   [_reactSubviews insertObject:childScreen atIndex:index];
-  _hasModifiedReactSubviewsInCurrentTransaction = true;
+  if (_controller != nil) {
+    [self routeInsertedScreen:childScreen atIndex:index];
+  }
 }
 
 - (void)unmountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
@@ -179,9 +212,11 @@ RNS_IGNORE_SUPER_CALL_END
             RNSSplitScreenComponentView.class);
 
   auto *childScreen = static_cast<RNSSplitScreenComponentView *>(childComponentView);
+  if (_controller != nil) {
+    [_controller removeScreen:childScreen inColumn:[self columnOfScreen:childScreen]];
+  }
   childScreen.splitHost = nil;
   [_reactSubviews removeObject:childScreen];
-  _hasModifiedReactSubviewsInCurrentTransaction = true;
 }
 
 + (react::ComponentDescriptorProvider)componentDescriptorProvider
@@ -370,16 +405,12 @@ RNS_IGNORE_SUPER_CALL_END
 - (void)mountingTransactionWillMount:(const facebook::react::MountingTransaction &)transaction
                 withSurfaceTelemetry:(const facebook::react::SurfaceTelemetry &)surfaceTelemetry
 {
-  _hasModifiedReactSubviewsInCurrentTransaction = false;
   [_controller reactMountingTransactionWillMount];
 }
 
 - (void)mountingTransactionDidMount:(const facebook::react::MountingTransaction &)transaction
                withSurfaceTelemetry:(const facebook::react::SurfaceTelemetry &)surfaceTelemetry
 {
-  if (_hasModifiedReactSubviewsInCurrentTransaction) {
-    [_controller setNeedsUpdateOfChildViewControllers];
-  }
   [_controller reactMountingTransactionDidMount];
 }
 
@@ -406,29 +437,6 @@ RNS_IGNORE_SUPER_CALL_END
 }
 
 #pragma mark - Events
-
-#pragma mark - RNSSplitHostColumnsProvider
-
-- (NSArray<RNSSplitScreenController *> *)columnControllers
-{
-  return [self controllersOfColumnsWithType:RNSSplitScreenColumnTypeColumn];
-}
-
-- (NSArray<RNSSplitScreenController *> *)inspectorControllers
-{
-  return [self controllersOfColumnsWithType:RNSSplitScreenColumnTypeInspector];
-}
-
-- (NSArray<RNSSplitScreenController *> *)controllersOfColumnsWithType:(RNSSplitScreenColumnType)columnType
-{
-  NSMutableArray<RNSSplitScreenController *> *controllers = [NSMutableArray array];
-  for (RNSSplitScreenComponentView *column in _reactSubviews) {
-    if (column.columnType == columnType) {
-      [controllers addObject:column.controller];
-    }
-  }
-  return controllers;
-}
 
 #pragma mark - RNSSplitHostControllerEventsDelegate
 

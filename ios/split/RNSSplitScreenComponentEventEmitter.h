@@ -52,6 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return true if the event was successfully emitted, false otherwise.
  */
 - (BOOL)emitOnDidDisappear;
+- (BOOL)emitOnDismissWithNativeDismiss:(BOOL)isNativeDismiss;
 
 @end
 

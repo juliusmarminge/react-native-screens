@@ -1,6 +1,7 @@
 #import "RNSSplitScreenController.h"
 
 #import <React/RCTAssert.h>
+#import "RNSHeaderCoordinator.h"
 #import "RNSSplitHostComponentView.h"
 #import "RNSSplitHostController.h"
 #import "RNSSplitScreenComponentView.h"
@@ -13,6 +14,7 @@
 {
   if (self = [super init]) {
     _splitScreenComponentView = splitScreenComponentView;
+    _headerCoordinator = [[RNSHeaderCoordinator alloc] initWithScreenController:self];
   }
 
   return self;
@@ -48,11 +50,6 @@
 
 #pragma mark - Signals
 
-- (void)setNeedsLifecycleStateUpdate
-{
-  [[self findSplitHostController] setNeedsUpdateOfChildViewControllers];
-}
-
 #pragma mark - Layout
 
 - (void)viewDidLayoutSubviews
@@ -63,6 +60,10 @@
   // we're attaching our touch handler and we don't need to apply any offset corrections,
   // because it's positioned relatively to our RNSSplitScreenComponentView
   if (![self isInSplitHostSubtree]) {
+    // A screen leaving its column has no navigation controller anymore; its frame is meaningless then.
+    if (self.navigationController == nil) {
+      return;
+    }
     [_delegate splitScreenController:self didChangeColumnFrame:self.view.frame];
     return;
   }
@@ -80,7 +81,10 @@
 
 - (void)reportColumnFrameInContextOfView:(UIView *)ancestorView
 {
-  CGRect frame = [self.view convertRect:self.view.frame toView:ancestorView];
+  // The column frame is the navigation controller's view frame, not the screen's: UIKit animates the screen view
+  // during push and pop transitions, the column stays put.
+  UIView *columnView = self.navigationController.view ?: self.view;
+  CGRect frame = [columnView convertRect:columnView.bounds toView:ancestorView];
   [_delegate splitScreenController:self didChangeColumnFrame:frame];
 }
 
@@ -89,6 +93,13 @@
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
+  // Without a header config the column keeps the system navigation bar, so the coordinator is not consulted.
+  if (_splitScreenComponentView.headerConfig != nil) {
+    [_headerCoordinator updateNavigationBarVisibilityAnimated:animated];
+#if !TARGET_OS_TV
+    [_headerCoordinator updateBackButtonMenuEnabled];
+#endif // !TARGET_OS_TV
+  }
   [_delegate splitScreenControllerWillAppear:self];
 }
 
@@ -108,6 +119,24 @@
 {
   [super viewDidDisappear:animated];
   [_delegate splitScreenControllerDidDisappear:self];
+}
+
+- (void)didMoveToParentViewController:(UIViewController *)parent
+{
+  [super didMoveToParentViewController:parent];
+
+  if (parent != nil) {
+    return;
+  }
+
+#if !TARGET_OS_TV
+  [_headerCoordinator clearAppliedBackButtonConfig];
+#endif // !TARGET_OS_TV
+
+  // A screen React still expects on the stack left it natively (e.g. the back button); a detached one was popped on
+  // React's request.
+  BOOL isNativeDismiss = _splitScreenComponentView.activityMode == RNSStackScreenActivityModeAttached;
+  [_delegate splitScreenController:self didDismissNatively:isNativeDismiss];
 }
 
 @end

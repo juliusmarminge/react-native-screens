@@ -6,8 +6,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class RNSSplitScreenController;
-
 /**
  * @brief Configuration of the UISplitViewController appearance.
  */
@@ -51,16 +49,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)hasCustomTopColumnForCollapsing;
 - (UISplitViewControllerColumn)topColumnForCollapsingColumn;
-
-@end
-
-/**
- * @brief Controllers of the columns mounted in the host, in React order, split by column type.
- */
-@protocol RNSSplitHostColumnsProvider <NSObject>
-
-- (NSArray<RNSSplitScreenController *> *)columnControllers;
-- (NSArray<RNSSplitScreenController *> *)inspectorControllers;
 
 @end
 

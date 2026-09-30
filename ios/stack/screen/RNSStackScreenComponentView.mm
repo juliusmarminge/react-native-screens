@@ -8,13 +8,13 @@
 #import <react/renderer/components/rnscreens/RNSStackScreenComponentDescriptor.h>
 
 #import "RNSConversions-Stack.h"
+#import "RNSHeaderConfigComponentView.h"
+#import "RNSHeaderCoordinator.h"
 #import "RNSScrollViewMarkerComponentView.h"
 #import "RNSScrollViewSeeking.h"
-#import "RNSStackHeaderConfigComponentView.h"
 #import "RNSStackHostComponentView.h"
 #import "RNSStackNavigationController.h"
 #import "RNSStackScreenController.h"
-#import "RNSStackScreenHeaderCoordinator.h"
 
 namespace react = facebook::react;
 
@@ -99,6 +99,13 @@ namespace react = facebook::react;
   return _contentScrollView;
 }
 
+#pragma mark - RNSStackScreenProviding
+
+- (nullable RNSHeaderCoordinator *)headerCoordinator
+{
+  return _controller.headerCoordinator;
+}
+
 #pragma mark - Events
 
 - (nonnull RNSStackScreenComponentEventEmitter *)reactEventEmitter
@@ -131,8 +138,8 @@ namespace react = facebook::react;
 
 - (void)mountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
 {
-  if ([childComponentView isKindOfClass:RNSStackHeaderConfigComponentView.class]) {
-    _headerConfig = (RNSStackHeaderConfigComponentView *)childComponentView;
+  if ([childComponentView isKindOfClass:RNSHeaderConfigComponentView.class]) {
+    _headerConfig = (RNSHeaderConfigComponentView *)childComponentView;
     _headerConfig.headerCoordinator = _controller.headerCoordinator;
     _controller.headerCoordinator.configDataProvider = _headerConfig;
     _controller.headerCoordinator.frameChangeDelegate = _headerConfig;
@@ -144,7 +151,7 @@ namespace react = facebook::react;
 
 - (void)unmountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
 {
-  if ([childComponentView isKindOfClass:RNSStackHeaderConfigComponentView.class]) {
+  if ([childComponentView isKindOfClass:RNSHeaderConfigComponentView.class]) {
     [_controller.headerCoordinator clearHeaderConfiguration];
     _headerConfig.headerCoordinator = nil;
     _headerConfig = nil;

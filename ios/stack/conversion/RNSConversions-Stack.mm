@@ -4,52 +4,53 @@ namespace rnscreens::conversion {
 
 namespace react = facebook::react;
 
-RNSStackScreenActivityMode RNSStackScreenActivityModeFromReactRNSStackScreenActivityMode(
-    react::RNSStackScreenActivityMode mode)
+template <>
+RNSStackScreenActivityMode convert(react::RNSStackScreenActivityMode mode)
 {
   return static_cast<RNSStackScreenActivityMode>(mode);
 }
 
-RNSHeaderItemPlacement RNSHeaderItemPlacementFromReactRNSStackHeaderItemIOSPlacement(
-    react::RNSStackHeaderItemIOSPlacement placement)
+template <>
+RNSHeaderItemPlacement convert(react::RNSHeaderItemIOSPlacement placement)
 {
   switch (placement) {
-    case react::RNSStackHeaderItemIOSPlacement::Leading:
+    case react::RNSHeaderItemIOSPlacement::Leading:
       return RNSHeaderItemPlacementLeading;
-    case react::RNSStackHeaderItemIOSPlacement::Trailing:
+    case react::RNSHeaderItemIOSPlacement::Trailing:
       return RNSHeaderItemPlacementTrailing;
-    case react::RNSStackHeaderItemIOSPlacement::Title:
+    case react::RNSHeaderItemIOSPlacement::Title:
       return RNSHeaderItemPlacementTitle;
-    case react::RNSStackHeaderItemIOSPlacement::Subtitle:
+    case react::RNSHeaderItemIOSPlacement::Subtitle:
       return RNSHeaderItemPlacementSubtitle;
-    case react::RNSStackHeaderItemIOSPlacement::LargeSubtitle:
+    case react::RNSHeaderItemIOSPlacement::LargeSubtitle:
       return RNSHeaderItemPlacementLargeSubtitle;
   }
 }
 
-RNSHeaderItemSpacerPlacement RNSHeaderItemSpacerPlacementFromReactRNSStackHeaderItemSpacerIOSPlacement(
-    react::RNSStackHeaderItemSpacerIOSPlacement placement)
+template <>
+RNSHeaderItemSpacerPlacement convert(react::RNSHeaderItemSpacerIOSPlacement placement)
 {
   switch (placement) {
-    case react::RNSStackHeaderItemSpacerIOSPlacement::Leading:
+    case react::RNSHeaderItemSpacerIOSPlacement::Leading:
       return RNSHeaderItemSpacerPlacementLeading;
-    case react::RNSStackHeaderItemSpacerIOSPlacement::Trailing:
+    case react::RNSHeaderItemSpacerIOSPlacement::Trailing:
       return RNSHeaderItemSpacerPlacementTrailing;
   }
 }
 
-UINavigationItemBackButtonDisplayMode
-UINavigationItemBackButtonDisplayModeFromReactRNSStackHeaderConfigIOSBackButtonDisplayMode(
-    react::RNSStackHeaderConfigIOSBackButtonDisplayMode displayMode)
+template <>
+UINavigationItemBackButtonDisplayMode convert(react::RNSHeaderConfigIOSBackButtonDisplayMode displayMode)
 {
   switch (displayMode) {
-    case react::RNSStackHeaderConfigIOSBackButtonDisplayMode::Default:
+    case react::RNSHeaderConfigIOSBackButtonDisplayMode::Default:
       return UINavigationItemBackButtonDisplayModeDefault;
-    case react::RNSStackHeaderConfigIOSBackButtonDisplayMode::Generic:
+    case react::RNSHeaderConfigIOSBackButtonDisplayMode::Generic:
       return UINavigationItemBackButtonDisplayModeGeneric;
-    case react::RNSStackHeaderConfigIOSBackButtonDisplayMode::Minimal:
+    case react::RNSHeaderConfigIOSBackButtonDisplayMode::Minimal:
       return UINavigationItemBackButtonDisplayModeMinimal;
   }
 }
+
+RNSStackScreenActivityMode RNSStackScreenActivityModeFromReactRNSStackScreenActivityMode(react::RNSStackScreenActivityMode mode) { return convert<RNSStackScreenActivityMode>(mode); }
 
 }; // namespace rnscreens::conversion

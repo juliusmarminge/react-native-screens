@@ -4,6 +4,7 @@
 
 @class RNSSplitScreenComponentView;
 @class RNSSplitScreenController;
+@class RNSHeaderCoordinator;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,6 +26,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)splitScreenControllerDidAppear:(RNSSplitScreenController *)controller;
 - (void)splitScreenControllerWillDisappear:(RNSSplitScreenController *)controller;
 - (void)splitScreenControllerDidDisappear:(RNSSplitScreenController *)controller;
+/**
+ * @brief Called when the screen left the navigation stack of its column.
+ *
+ * @param isNativeDismiss YES when the screen was removed natively (e.g. by the back button) while React still
+ * expects it to be attached.
+ */
+- (void)splitScreenController:(RNSSplitScreenController *)controller didDismissNatively:(BOOL)isNativeDismiss;
 
 @end
 
@@ -32,11 +40,15 @@ NS_ASSUME_NONNULL_BEGIN
  * @class RNSSplitScreenController
  * @brief A UIViewController subclass that manages a Split column in a UISplitViewController.
  *
- * It observes the column layout and lifecycle and reports them to its delegate.
+ * Associated with a RNSSplitScreenComponentView, it observes the column layout and lifecycle, reports them to its
+ * delegate, and interacts with the SplitHost hierarchy.
  */
 @interface RNSSplitScreenController : UIViewController
 
 @property (nonatomic, weak, nullable) id<RNSSplitScreenControllerDelegate> delegate;
+
+/** @brief Applies the screen's `RNSHeaderConfig`, if any, to its navigation item. */
+@property (nonatomic, strong, readonly, nonnull) RNSHeaderCoordinator *headerCoordinator;
 
 - (instancetype)initWithSplitScreenComponentView:(RNSSplitScreenComponentView *)splitScreenComponentView;
 
@@ -50,8 +62,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return true if inside RNSSplitHostController, false otherwise.
  */
 - (BOOL)isInSplitHostSubtree;
-
-- (void)setNeedsLifecycleStateUpdate;
 
 #pragma mark - Layout
 

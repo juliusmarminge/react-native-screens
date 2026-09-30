@@ -21,4 +21,7 @@ RNSOrientation RNSOrientationFromUIInterfaceOrientationMask(
 
 }; // namespace rnscreens::conversion
 
+#import "RNSConversions-Stack.h"
+#import "RNSConversions-SplitView.h"
+
 #endif // defined(__cplusplus)

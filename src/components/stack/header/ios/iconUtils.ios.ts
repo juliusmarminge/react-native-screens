@@ -1,4 +1,4 @@
-import type { PlatformIconIOS as ResolvedPlatformIconIOS } from '../../../../fabric/stack/StackHeaderItemIOSNativeComponent';
+import type { PlatformIconIOS as ResolvedPlatformIconIOS } from '../../../../fabric/header/HeaderItemIOSNativeComponent';
 import type { PlatformIconIOS } from '../../../shared/types';
 import type {
   StackHeaderMenuIOS,

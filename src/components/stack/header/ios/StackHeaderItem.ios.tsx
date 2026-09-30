@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import StackHeaderItemIOSNativeComponent from '../../../../fabric/stack/StackHeaderItemIOSNativeComponent';
-import type { HeaderItemPressEvent } from '../../../../fabric/stack/StackHeaderItemIOSNativeComponent';
+import StackHeaderItemIOSNativeComponent from '../../../../fabric/header/HeaderItemIOSNativeComponent';
+import type { HeaderItemPressEvent } from '../../../../fabric/header/HeaderItemIOSNativeComponent';
 import type { StackHeaderItemProps } from './StackHeaderItem.ios.types';
 import { NativeSyntheticEvent, StyleSheet } from 'react-native';
 import { resolveIconAssetSources, resolveMenuIcons } from './iconUtils.ios';

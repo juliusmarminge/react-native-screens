@@ -1,9 +1,14 @@
 #import "RNSSplitScreenComponentView.h"
 #import <React/RCTAssert.h>
+#import <React/RCTConversions.h>
 #import <React/RCTSurfaceTouchHandler.h>
 #import <react/renderer/components/rnscreens/RNSSplitScreenComponentDescriptor.h>
+#import "RNSConversions.h"
 #import "RNSConversions-SplitView.h"
+#import "RNSHeaderConfigComponentView.h"
+#import "RNSHeaderCoordinator.h"
 #import "RNSSafeAreaViewNotifications.h"
+#import "RNSSplitHostComponentView.h"
 #import "RNSSplitScreenComponentEventEmitter.h"
 #import "RNSSplitScreenController.h"
 #import "RNSSplitScreenShadowStateProxy.h"
@@ -19,6 +24,7 @@ namespace react = facebook::react;
   RNSSplitScreenShadowStateProxy *_Nonnull _shadowStateProxy;
   RCTSurfaceTouchHandler *_Nullable _touchHandler;
   NSMutableSet<UIView *> *_viewsForFrameCorrection;
+  BOOL _hasUpdatedActivityMode;
 }
 
 - (RNSSplitScreenController *)controller
@@ -48,6 +54,7 @@ namespace react = facebook::react;
   _shadowStateProxy = [RNSSplitScreenShadowStateProxy new];
 
   _viewsForFrameCorrection = [NSMutableSet set];
+  _hasUpdatedActivityMode = NO;
 }
 
 - (void)setupController
@@ -88,6 +95,9 @@ namespace react = facebook::react;
   _props = defaultProps;
 
   _columnType = RNSSplitScreenColumnTypeColumn;
+  _column = -1;
+  _activityMode = RNSStackScreenActivityModeAttached;
+  _screenKey = nil;
 }
 
 - (void)registerForFrameCorrection:(UIView *)view
@@ -141,6 +151,18 @@ namespace react = facebook::react;
   [_reactEventEmitter emitOnDidDisappear];
 }
 
+- (void)splitScreenController:(RNSSplitScreenController *)controller didDismissNatively:(BOOL)isNativeDismiss
+{
+  [_reactEventEmitter emitOnDismissWithNativeDismiss:isNativeDismiss];
+}
+
+#pragma mark - RNSStackScreenProviding
+
+- (nullable RNSHeaderCoordinator *)headerCoordinator
+{
+  return _controller.headerCoordinator;
+}
+
 #pragma mark - RNSSafeAreaProviding
 
 - (UIEdgeInsets)providerSafeAreaInsets
@@ -177,6 +199,29 @@ namespace react = facebook::react;
   return NO;
 }
 
+- (void)mountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
+{
+  if ([childComponentView isKindOfClass:RNSHeaderConfigComponentView.class]) {
+    _headerConfig = (RNSHeaderConfigComponentView *)childComponentView;
+    _headerConfig.headerCoordinator = _controller.headerCoordinator;
+    _controller.headerCoordinator.configDataProvider = _headerConfig;
+    _controller.headerCoordinator.frameChangeDelegate = _headerConfig;
+    _controller.headerCoordinator.eventsDelegate = _headerConfig;
+    _controller.headerCoordinator.imageLoader = _headerConfig;
+  }
+  [super mountChildComponentView:childComponentView index:index];
+}
+
+- (void)unmountChildComponentView:(UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index
+{
+  if ([childComponentView isKindOfClass:RNSHeaderConfigComponentView.class]) {
+    [_controller.headerCoordinator clearHeaderConfiguration];
+    _headerConfig.headerCoordinator = nil;
+    _headerConfig = nil;
+  }
+  [super unmountChildComponentView:childComponentView index:index];
+}
+
 - (void)updateState:(react::State::Shared const &)state oldState:(react::State::Shared const &)oldState
 {
   [super updateState:state oldState:oldState];
@@ -194,7 +239,31 @@ namespace react = facebook::react;
     _columnType = rnscreens::conversion::RNSSplitScreenColumnTypeFromScreenProp(newComponentProps.columnType);
   }
 
+  if (oldComponentProps.column != newComponentProps.column) {
+    _column = newComponentProps.column;
+  }
+
+  if (oldComponentProps.screenKey != newComponentProps.screenKey) {
+    _screenKey = RCTNSStringFromStringNilIfEmpty(newComponentProps.screenKey);
+  }
+
+  if (oldComponentProps.activityMode != newComponentProps.activityMode) {
+    _activityMode =
+        rnscreens::conversion::RNSStackScreenActivityModeFromSplitScreenProp(newComponentProps.activityMode);
+    _hasUpdatedActivityMode = YES;
+  }
+
   [super updateProps:props oldProps:oldProps];
+}
+
+- (void)finalizeUpdates:(RNComponentViewUpdateMask)updateMask
+{
+  if (_hasUpdatedActivityMode) {
+    _hasUpdatedActivityMode = NO;
+    [self.splitHost splitScreenDidChangeActivityMode:self];
+  }
+
+  [super finalizeUpdates:updateMask];
 }
 
 - (void)updateEventEmitter:(const facebook::react::EventEmitter::Shared &)eventEmitter
@@ -208,8 +277,15 @@ namespace react = facebook::react;
 {
   // Controller keeps the strong reference to the component via the `.view` property.
   // Therefore, we need to enforce a proper cleanup, breaking the retain cycle,
-  // when we want to destroy the component.
-  _controller = nil;
+  // when we want to destroy the component. It is deferred so that a pending pop of the screen, applied after the
+  // mounting transaction, still finds the controller.
+  __weak auto weakSelf = self;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    auto strongSelf = weakSelf;
+    if (strongSelf) {
+      strongSelf->_controller = nil;
+    }
+  });
 }
 
 #pragma mark - Dynamic frameworks support

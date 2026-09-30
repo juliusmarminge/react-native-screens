@@ -196,4 +196,20 @@ RNSSplitScreenColumnType RNSSplitScreenColumnTypeFromScreenProp(facebook::react:
   }
 }
 
+RNSStackScreenActivityMode RNSStackScreenActivityModeFromSplitScreenProp(
+    facebook::react::RNSSplitScreenActivityMode activityMode)
+{
+  using enum facebook::react::RNSSplitScreenActivityMode;
+
+  switch (activityMode) {
+    case Detached:
+      return RNSStackScreenActivityModeDetached;
+    case Attached:
+    default:
+      return RNSStackScreenActivityModeAttached;
+  }
+}
+
+RNSStackScreenActivityMode RNSStackScreenActivityModeFromSplitScreenProp(react::RNSSplitScreenActivityMode activityMode) { return static_cast<RNSStackScreenActivityMode>(activityMode); }
+
 }; // namespace rnscreens::conversion

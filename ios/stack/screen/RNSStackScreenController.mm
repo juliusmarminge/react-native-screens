@@ -1,12 +1,12 @@
 #import "RNSStackScreenController.h"
 #import "RNSContainer.h"
 #import "RNSContainerItemSupport.h"
+#import "RNSHeaderCoordinator.h"
 #import "RNSLog.h"
 #import "RNSStackHostComponentView.h"
 #import "RNSStackNavigationController.h"
 #import "RNSStackScreenComponentEventEmitter.h"
 #import "RNSStackScreenComponentView.h"
-#import "RNSStackScreenHeaderCoordinator.h"
 
 @implementation RNSStackScreenController {
   RNSStackScreenComponentView *_Nonnull _screenView;
@@ -17,7 +17,7 @@
 {
   if (self = [super initWithNibName:nil bundle:nil]) {
     _screenView = componentView;
-    _headerCoordinator = [[RNSStackScreenHeaderCoordinator alloc] initWithScreenController:self];
+    _headerCoordinator = [[RNSHeaderCoordinator alloc] initWithScreenController:self];
     _containerItemSupport = [RNSContainerItemSupport new];
   }
   return self;

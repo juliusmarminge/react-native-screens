@@ -2,22 +2,18 @@
 
 #import "RNSReactBaseView.h"
 #import "RNSStackScreenComponentEventEmitter.h"
+#import "RNSStackScreenProviding.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class RNSStackScreenController;
 @class RNSStackHostComponentView;
-@class RNSStackHeaderConfigComponentView;
+@class RNSHeaderConfigComponentView;
 
-typedef NS_ENUM(int, RNSStackScreenActivityMode) {
-  RNSStackScreenActivityModeDetached = 0,
-  RNSStackScreenActivityModeAttached = 1,
-};
-
-@interface RNSStackScreenComponentView : RNSReactBaseView
+@interface RNSStackScreenComponentView : RNSReactBaseView <RNSStackScreenProviding>
 
 @property (nonatomic, weak, readwrite, nullable) RNSStackHostComponentView *stackHost;
-@property (nonatomic, weak, readonly, nullable) RNSStackHeaderConfigComponentView *headerConfig;
+@property (nonatomic, weak, readonly, nullable) RNSHeaderConfigComponentView *headerConfig;
 @property (nonatomic, strong, readonly, nonnull) RNSStackScreenController *controller;
 @property (nonatomic) BOOL isNativelyDismissed;
 

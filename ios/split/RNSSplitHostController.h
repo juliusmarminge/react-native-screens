@@ -4,6 +4,7 @@
 #import "RNSOrientationProviding.h"
 #import "RNSReactMountingTransactionObserving.h"
 #import "RNSSplitHostProviders.h"
+#import "RNSStackScreenProviding.h"
 
 @class RNSSplitHostController;
 
@@ -37,7 +38,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, nullable) id<RNSSplitHostControllerEventsDelegate> eventsDelegate;
 @property (nonatomic, weak, nullable) id<RNSSplitHostAppearanceProvider> appearanceProvider;
 @property (nonatomic, weak, nullable) id<RNSSplitHostBehaviorProvider> behaviorProvider;
-@property (nonatomic, weak, nullable) id<RNSSplitHostColumnsProvider> columnsProvider;
 
 /**
  * @brief Initializes the Split host controller with provided style.
@@ -50,8 +50,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Signals
 
-- (void)setNeedsUpdateOfChildViewControllers;
-
 - (void)setNeedsAppearanceUpdate;
 
 - (void)setNeedsSecondaryScreenNavBarUpdate;
@@ -60,18 +58,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setNeedsOrientationUpdate;
 
-#pragma mark - Updating
-
-- (void)updateChildViewControllersIfNeeded;
+#pragma mark - Screens
 
 /**
- * @brief Creates and attaches the Split child controllers based on the current React subviews.
- *
- * It validates constraints for Split hierarchy and it will crash after recognizing an invalid state,
- * e. g. dynamically changed number of columns or number of columns that isn't between defined bounds.
- * If Split constraints are met, it attaches SplitScreen representatives to SplitHost component.
+ * @brief Routes a screen mounted in the host to its column. `column` is the index of the column, or `-1` for the
+ * inspector; `index` is the position of the screen among the screens of that column.
  */
-- (void)updateChildViewControllers;
+- (void)insertScreen:(UIView<RNSStackScreenProviding> *)screen inColumn:(NSInteger)column atIndex:(NSInteger)index;
+- (void)removeScreen:(UIView<RNSStackScreenProviding> *)screen inColumn:(NSInteger)column;
+- (void)screenDidChangeActivityMode:(UIView<RNSStackScreenProviding> *)screen inColumn:(NSInteger)column;
+
+#pragma mark - Updating
 
 /**
  * @brief Triggering appearance updates on secondary column's UINavigationBar component
