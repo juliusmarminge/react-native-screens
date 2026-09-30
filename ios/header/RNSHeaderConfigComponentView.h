@@ -20,6 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, nullable) NSString *subtitle;
 @property (nonatomic, readonly) BOOL hidden;
 @property (nonatomic, readonly) BOOL backButtonHidden;
+#if RNS_IPHONE_OS_VERSION_AVAILABLE(16_0) && !TARGET_OS_TV
+@property (nonatomic, readonly) UINavigationItemStyle navigationItemStyle API_AVAILABLE(ios(16.0));
+#endif
 @property (nonatomic, readonly, nullable) NSString *largeTitle;
 @property (nonatomic, readonly, nullable) NSString *largeSubtitle;
 @property (nonatomic, readonly) BOOL largeTitleEnabled;

@@ -4,6 +4,21 @@ namespace rnscreens::conversion {
 
 namespace react = facebook::react;
 
+#if RNS_IPHONE_OS_VERSION_AVAILABLE(16_0) && !TARGET_OS_TV
+UINavigationItemStyle UINavigationItemStyleFromReactRNSHeaderConfigIOSNavigationItemStyle(
+    react::RNSHeaderConfigIOSNavigationItemStyle style)
+{
+  switch (style) {
+    case react::RNSHeaderConfigIOSNavigationItemStyle::Navigator:
+      return UINavigationItemStyleNavigator;
+    case react::RNSHeaderConfigIOSNavigationItemStyle::Browser:
+      return UINavigationItemStyleBrowser;
+    case react::RNSHeaderConfigIOSNavigationItemStyle::Editor:
+      return UINavigationItemStyleEditor;
+  }
+}
+#endif
+
 template <>
 RNSStackScreenActivityMode convert(react::RNSStackScreenActivityMode mode)
 {

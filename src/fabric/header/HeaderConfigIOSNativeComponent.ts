@@ -14,6 +14,7 @@ import type {
 import { UnsafeMixed } from '../codegenUtils';
 
 type BackButtonDisplayMode = 'default' | 'generic' | 'minimal';
+type NavigationItemStyle = 'navigator' | 'browser' | 'editor';
 
 export type HeaderAppearance = {
   backgroundColor?: ProcessedColorValue | null | undefined;
@@ -52,6 +53,7 @@ export interface NativeProps extends ViewProps {
   backButtonHidden?: CT.WithDefault<boolean, false>;
 
   // iOS-specific props
+  navigationItemStyle?: CT.WithDefault<NavigationItemStyle, 'navigator'>;
   backButtonTitle?: string | undefined;
   backButtonDisplayMode?: CT.WithDefault<BackButtonDisplayMode, 'default'>;
   backButtonMenuEnabled?: CT.WithDefault<boolean, true>;

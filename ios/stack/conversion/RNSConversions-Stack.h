@@ -4,6 +4,7 @@
 
 #import <UIKit/UIKit.h>
 #import <react/renderer/components/rnscreens/Props.h>
+#import "RNSDefines.h"
 #import "RNSHeaderItemPlacement.h"
 #import "RNSHeaderItemSpacerPlacement.h"
 #import "RNSStackScreenProviding.h"
@@ -12,6 +13,13 @@
 namespace react = facebook::react;
 
 namespace rnscreens::conversion {
+#if RNS_IPHONE_OS_VERSION_AVAILABLE(16_0) && !TARGET_OS_TV
+UINavigationItemStyle
+UINavigationItemStyleFromReactRNSHeaderConfigIOSNavigationItemStyle(
+    react::RNSHeaderConfigIOSNavigationItemStyle style)
+    API_AVAILABLE(ios(16.0));
+#endif
+
 
 template <typename TargetType, typename InputType>
 TargetType convert(InputType) {
