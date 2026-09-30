@@ -43,7 +43,7 @@ namespace react = facebook::react;
     if (_didSetHeaderItemSpacerPlacement) {
       RCTLogWarn(@"[RNScreens] Changing header item spacer placement at runtime is not supported");
     } else {
-      _placement = rnscreens::conversion::RNSHeaderItemSpacerPlacementFromReactRNSStackHeaderItemSpacerIOSPlacement(
+      _placement = rnscreens::conversion::convert<RNSHeaderItemSpacerPlacement>(
           newSpacerProps.placement);
     }
   }

@@ -3,11 +3,13 @@
 #import <UIKit/UIKit.h>
 
 @class RNSHeaderMenuData;
+@class RNSSearchBar;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol RNSHeaderConfigDataProviding <NSObject>
 
+@property (nonatomic, readonly, nullable) RNSSearchBar *searchBar;
 @property (nonatomic, readonly, nullable) NSString *title;
 @property (nonatomic, readonly, nullable) NSString *subtitle;
 @property (nonatomic, readonly) BOOL hidden;
@@ -24,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Children are expected to conform to either RNSHeaderItemDataProviding
- or RNSHeaderItemSpacerDataProviding, other types are ignored.
+ or RNSHeaderItemSpacerDataProviding, or be an RNSSearchBar.
  */
 @property (nonatomic, readonly) NSArray<id> *children;
 

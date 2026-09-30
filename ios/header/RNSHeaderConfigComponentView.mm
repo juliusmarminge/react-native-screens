@@ -11,6 +11,16 @@
 #import "RNSHeaderMenuUpdateOptions.h"
 #import "RNSConversions-Stack.h"
 #import "RNSImageLoadingHelper.h"
+#import "RNSSearchBar.h"
+#import "RNSHeaderAppearanceMapper.h"
+#import "RNSHeaderConfigEventEmitter.h"
+#import "RNSHeaderConfigShadowStateProxy.h"
+#import "RNSHeaderItemComponentView.h"
+#import "RNSHeaderItemSpacerComponentView.h"
+#import "RNSHeaderMenuCoordinator.h"
+#import "RNSHeaderMenuFinder.h"
+#import "RNSHeaderMenuMapper.h"
+#import "RNSHeaderMenuUpdateOptions.h"
 #import "RNSStackNavigationController.h"
 #import "RNSStackScreenProviding.h"
 
@@ -27,15 +37,19 @@ namespace react = facebook::react;
 
 static void RNSAssertIsValidHeaderChild(UIView *child)
 {
-  RCTAssert([child isKindOfClass:RNSHeaderItemComponentView.class] ||
-                [child isKindOfClass:RNSHeaderItemSpacerComponentView.class],
-            @"[RNScreens] Unexpected child of type: %@, expected %@ or %@",
-            child.class,
-            RNSHeaderItemComponentView.class,
-            RNSHeaderItemSpacerComponentView.class);
+  RCTAssert(
+      [child isKindOfClass:RNSHeaderItemComponentView.class] ||
+          [child isKindOfClass:RNSHeaderItemSpacerComponentView.class] || [child isKindOfClass:RNSSearchBar.class],
+      @"[RNScreens] Unexpected child of type: %@, expected %@, %@ or %@",
+      child.class,
+      RNSHeaderItemComponentView.class,
+      RNSHeaderItemSpacerComponentView.class,
+      RNSSearchBar.class);
 }
 
-@interface RNSHeaderConfigComponentView () <RCTRNSHeaderConfigIOSViewProtocol>
+@interface RNSHeaderConfigComponentView () <
+    RCTRNSHeaderConfigIOSViewProtocol,
+    RNSSearchBarNavigationItemDelegate>
 @end
 
 @implementation RNSHeaderConfigComponentView {
@@ -74,6 +88,16 @@ static void RNSAssertIsValidHeaderChild(UIView *child)
   _titleMenu = nil;
   _standardAppearance = nil;
   _scrollEdgeAppearance = nil;
+}
+
+- (nullable RNSSearchBar *)searchBar
+{
+  for (UIView *child in _children) {
+    if ([child isKindOfClass:RNSSearchBar.class]) {
+      return (RNSSearchBar *)child;
+    }
+  }
+  return nil;
 }
 
 - (NSArray<id> *)children
@@ -148,6 +172,8 @@ static void RNSAssertIsValidHeaderChild(UIView *child)
     ((RNSHeaderItemComponentView *)childComponentView).invalidationDelegate = self;
   } else if ([childComponentView isKindOfClass:RNSHeaderItemSpacerComponentView.class]) {
     ((RNSHeaderItemSpacerComponentView *)childComponentView).invalidationDelegate = self;
+  } else if ([childComponentView isKindOfClass:RNSSearchBar.class]) {
+    ((RNSSearchBar *)childComponentView).navigationItemDelegate = self;
   }
 
   [self.headerCoordinator rebuild];
@@ -161,10 +187,19 @@ static void RNSAssertIsValidHeaderChild(UIView *child)
     ((RNSHeaderItemComponentView *)childComponentView).invalidationDelegate = nil;
   } else if ([childComponentView isKindOfClass:RNSHeaderItemSpacerComponentView.class]) {
     ((RNSHeaderItemSpacerComponentView *)childComponentView).invalidationDelegate = nil;
+  } else if ([childComponentView isKindOfClass:RNSSearchBar.class]) {
+    ((RNSSearchBar *)childComponentView).navigationItemDelegate = nil;
   }
 
   [_children removeObjectAtIndex:index];
   [self.headerCoordinator rebuild];
+}
+
+#pragma mark - RNSSearchBarNavigationItemDelegate
+
+- (void)searchBarDidUpdateNavigationItem:(RNSSearchBar *)searchBar
+{
+  [self.headerCoordinator applyConfigProperties];
 }
 
 #pragma mark - RNSHeaderItemInvalidationDelegate
