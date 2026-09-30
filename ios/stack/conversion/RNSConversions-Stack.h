@@ -8,7 +8,7 @@
 #import "RNSHeaderItemPlacement.h"
 #import "RNSHeaderItemSpacerPlacement.h"
 #import "RNSStackScreenProviding.h"
-#import "always_false.h"
+#include <type_traits>
 
 namespace react = facebook::react;
 
@@ -21,10 +21,13 @@ UINavigationItemStyleFromReactRNSHeaderConfigIOSNavigationItemStyle(
 #endif
 
 
+template <typename>
+inline constexpr bool missingConversion = false;
+
 template <typename TargetType, typename InputType>
 TargetType convert(InputType) {
   static_assert(
-      rnscreens::always_false<TargetType>::value,
+      missingConversion<TargetType>,
       "[RNScreens] Missing template specialisation for demanded types!");
 }
 
