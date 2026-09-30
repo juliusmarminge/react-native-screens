@@ -210,6 +210,4 @@ RNSStackScreenActivityMode RNSStackScreenActivityModeFromSplitScreenProp(
   }
 }
 
-RNSStackScreenActivityMode RNSStackScreenActivityModeFromSplitScreenProp(react::RNSSplitScreenActivityMode activityMode) { return static_cast<RNSStackScreenActivityMode>(activityMode); }
-
 }; // namespace rnscreens::conversion
