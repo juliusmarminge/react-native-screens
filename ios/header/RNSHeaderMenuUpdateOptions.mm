@@ -23,9 +23,8 @@ static NSString *_Nullable RNSResolveStringFromDict(NSDictionary *dict, NSString
   return fallback;
 }
 
-static RNSHeaderIconData *_Nullable RNSResolveIconFromDict(NSDictionary *dict,
-                                                           NSString *key,
-                                                           RNSHeaderIconData *_Nullable fallback)
+static RNSHeaderIconData
+    *_Nullable RNSResolveIconFromDict(NSDictionary *dict, NSString *key, RNSHeaderIconData *_Nullable fallback)
 {
   id value = dict[key];
   if (value == nil) {
@@ -89,11 +88,14 @@ static RNSHeaderIconData *_Nullable RNSResolveIconFromDict(NSDictionary *dict,
   RNSHeaderIconData *icon = options.hasIcon ? options.icon : old.icon;
 
   return [[RNSHeaderMenuItemData alloc] initWithId:old.menuElementId
-                                             title:title
-                                          itemType:old.itemType
-                                initialToggleState:old.initialToggleState
-                                keepsMenuPresented:old.keepsMenuPresented
-                                              icon:icon];
+                                                  title:title
+                                               subtitle:old.subtitle
+                                               disabled:old.disabled
+                                            destructive:old.destructive
+                                               itemType:old.itemType
+                                     initialToggleState:old.initialToggleState
+                                     keepsMenuPresented:old.keepsMenuPresented
+                                                   icon:icon];
 }
 
 @end
