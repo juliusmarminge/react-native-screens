@@ -379,6 +379,7 @@
   [self applySearchBar:nil forController:controller];
   [controller setToolbarItems:nil animated:YES];
   navItem.prompt = nil;
+  navItem.hidesBackButton = NO;
   navItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 
   [self clearAppliedBackButtonConfig];
@@ -473,6 +474,7 @@
 
 #if !TARGET_OS_TV
   [self applySearchBar:_configDataProvider.searchBar forController:controller];
+  navItem.hidesBackButton = _configDataProvider.backButtonHidden;
 
   NSString *prompt = _configDataProvider.prompt;
   if (navItem.prompt != prompt && ![navItem.prompt isEqualToString:prompt]) {

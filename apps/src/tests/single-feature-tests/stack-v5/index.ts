@@ -15,6 +15,7 @@ import TestStackCustomTitleScrollEdgeIOS from './test-stack-custom-title-scroll-
 import TestStackHeaderMenuIOS from './test-stack-header-menu-ios';
 import TestStackHeaderIconIOS from './test-stack-header-icon-ios';
 import TestStackBackButtonIOS from './test-stack-back-button-ios';
+import TestStackBackButtonHiddenIOS from './test-stack-back-button-hidden-ios';
 import TestStackBackButtonAndroid from './test-stack-back-button-android';
 import TestStackOverflowIcon from './test-stack-overflow-icon-android';
 import TestStackToolbarMenuCommands from './test-stack-toolbar-menu-commands-android';
@@ -60,6 +61,7 @@ export { default as TestStackHeaderMenuOptionsIOS } from './test-stack-header-me
 export { default as TestStackHeaderSelectiveUpdatesIOS } from './test-stack-header-selective-updates-ios';
 export { default as TestStackHeaderSubviewOnPressIOS } from './test-stack-header-subview-onpress-ios';
 export { default as TestStackBackButtonIOS } from './test-stack-back-button-ios';
+export { default as TestStackBackButtonHiddenIOS } from './test-stack-back-button-hidden-ios';
 export { default as TestStackBackButtonAndroid } from './test-stack-back-button-android';
 export { default as TestStackOverflowIcon } from './test-stack-overflow-icon-android';
 export { default as TestStackToolbarMenuCommands } from './test-stack-toolbar-menu-commands-android';
@@ -103,6 +105,7 @@ const scenarios = {
   TestStackHeaderSelectiveUpdates,
   TestStackHeaderMenuOptionsIOS,
   TestStackBackButtonIOS,
+  TestStackBackButtonHiddenIOS,
   TestStackBackButtonAndroid,
   TestStackOverflowIcon,
   TestStackToolbarMenuCommands,
