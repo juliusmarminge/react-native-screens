@@ -31,6 +31,7 @@ import TestStackHeaderSubviewOnPress from './test-stack-header-subview-onpress-i
 import TestStackHeaderSelectiveUpdates from './test-stack-header-selective-updates-ios';
 import TestStackHeaderMenuOptionsIOS from './test-stack-header-menu-options-ios';
 import TestStackHeaderItemIdentifierIOS from './test-stack-header-item-identifier-ios';
+import TestStackHeaderAxisBehaviorIOS from './test-stack-header-axis-behavior-ios';
 import TestStackHeaderTitleAppearanceAndroid from './test-stack-header-title-appearance-android';
 import TestStackHeaderTitleAppearanceIOS from './test-stack-header-title-appearance-ios';
 import TestStackHeaderBarColorsIOS from './test-stack-header-bar-colors-ios';
@@ -56,6 +57,7 @@ export { default as TestStackSubviewsIOS } from './test-stack-subviews-ios';
 export { default as TestStackCustomTitleScrollEdgeIOS } from './test-stack-custom-title-scroll-edge-ios';
 export { default as TestStackHeaderIconIOS } from './test-stack-header-icon-ios';
 export { default as TestStackHeaderItemIdentifierIOS } from './test-stack-header-item-identifier-ios';
+export { default as TestStackHeaderAxisBehaviorIOS } from './test-stack-header-axis-behavior-ios';
 export { default as TestStackHeaderMenuIOS } from './test-stack-header-menu-ios';
 export { default as TestStackHeaderMenuOptionsIOS } from './test-stack-header-menu-options-ios';
 export { default as TestStackHeaderSelectiveUpdatesIOS } from './test-stack-header-selective-updates-ios';
@@ -101,6 +103,7 @@ const scenarios = {
   TestStackHeaderMenuIOS,
   TestStackHeaderIconIOS,
   TestStackHeaderItemIdentifierIOS,
+  TestStackHeaderAxisBehaviorIOS,
   TestStackHeaderSubviewOnPress,
   TestStackHeaderSelectiveUpdates,
   TestStackHeaderMenuOptionsIOS,
