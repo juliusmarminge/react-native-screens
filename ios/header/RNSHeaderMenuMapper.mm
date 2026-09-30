@@ -19,6 +19,7 @@ static NSSet<NSString *> *const kRNSAllowedMenuItemKeys = [NSSet setWithObjects:
                                                                                 @"subtitle",
                                                                                 @"disabled",
                                                                                 @"destructive",
+                                                                                @"state",
                                                                                 @"itemType",
                                                                                 @"initialToggleState",
                                                                                 @"keepsMenuPresented",
@@ -88,6 +89,7 @@ static NSSet<NSString *> *const kRNSAllowedMenuItemKeys = [NSSet setWithObjects:
                                               destructive:[self boolForKey:@"destructive" in:dict]
                                                  itemType:[self itemTypeFromString:[self stringForKey:@"itemType"
                                                                                                    in:dict]]
+                                       state:[self menuItemStateFromString:[self stringForKey:@"state" in:dict]]
                                        initialToggleState:[self boolForKey:@"initialToggleState" in:dict]
                                        keepsMenuPresented:[self boolForKey:@"keepsMenuPresented" in:dict]
                                                      icon:icon];
@@ -97,6 +99,17 @@ static NSSet<NSString *> *const kRNSAllowedMenuItemKeys = [NSSet setWithObjects:
 }
 
 #pragma mark - Helpers
+
++ (UIMenuElementState)menuItemStateFromString:(nullable NSString *)string
+{
+  if ([string isEqualToString:@"on"]) {
+    return UIMenuElementStateOn;
+  }
+  if ([string isEqualToString:@"mixed"]) {
+    return UIMenuElementStateMixed;
+  }
+  return UIMenuElementStateOff;
+}
 
 + (void)validateMenuKeys:(NSDictionary *)dict
 {

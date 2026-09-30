@@ -262,6 +262,7 @@
                                          [weakDelegate didPressMenuItem:data.menuElementId];
                                        }];
 
+  action.state = data.state;
   [self decorateAction:action withData:data];
 
   return action;

@@ -10,6 +10,7 @@
                   disabled:(BOOL)disabled
                destructive:(BOOL)destructive
                   itemType:(RNSMenuItemType)itemType
+                     state:(UIMenuElementState)state
         initialToggleState:(BOOL)initialToggleState
         keepsMenuPresented:(BOOL)keepsMenuPresented
                       icon:(nullable RNSHeaderIconData *)icon
@@ -21,6 +22,7 @@
     _disabled = disabled;
     _destructive = destructive;
     _itemType = itemType;
+    _state = state;
     _initialToggleState = initialToggleState;
     _keepsMenuPresented = keepsMenuPresented;
     _icon = icon;

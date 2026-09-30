@@ -1,6 +1,7 @@
 #pragma once
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @class RNSHeaderIconData;
 
@@ -25,6 +26,7 @@ typedef NS_ENUM(NSInteger, RNSMenuItemType) {
 @property (nonatomic, readonly) BOOL disabled;
 @property (nonatomic, readonly) BOOL destructive;
 @property (nonatomic, readonly) RNSMenuItemType itemType;
+@property (nonatomic, readonly) UIMenuElementState state;
 @property (nonatomic, readonly) BOOL initialToggleState;
 @property (nonatomic, readonly) BOOL keepsMenuPresented;
 @property (nonatomic, strong, readonly, nullable) RNSHeaderIconData *icon;
@@ -35,6 +37,7 @@ typedef NS_ENUM(NSInteger, RNSMenuItemType) {
                   disabled:(BOOL)disabled
                destructive:(BOOL)destructive
                   itemType:(RNSMenuItemType)itemType
+                     state:(UIMenuElementState)state
         initialToggleState:(BOOL)initialToggleState
         keepsMenuPresented:(BOOL)keepsMenuPresented
                       icon:(nullable RNSHeaderIconData *)icon;

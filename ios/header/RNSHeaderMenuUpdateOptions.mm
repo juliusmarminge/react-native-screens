@@ -1,5 +1,6 @@
 #import "RNSHeaderMenuUpdateOptions.h"
 #import "RNSHeaderIconMapper.h"
+#import "RNSHeaderMenuMapper.h"
 
 #pragma mark - Helpers
 
@@ -46,6 +47,8 @@ static RNSHeaderIconData
                       hasIcon:(BOOL)hasIcon
                hasToggleState:(BOOL)hasToggleState
                   toggleState:(BOOL)toggleState
+                     hasState:(BOOL)hasState
+                        state:(UIMenuElementState)state
 {
   if (self = [super init]) {
     _title = [title copy];
@@ -54,6 +57,8 @@ static RNSHeaderIconData
     _hasIcon = hasIcon;
     _hasToggleState = hasToggleState;
     _toggleState = toggleState;
+    _hasState = hasState;
+    _state = state;
   }
   return self;
 }
@@ -74,12 +79,18 @@ static RNSHeaderIconData
     toggleState = [toggleValue boolValue];
   }
 
+  BOOL hasState = RNSDictHasKey(dict, @"state");
+  UIMenuElementState state =
+      [RNSHeaderMenuMapper menuItemStateFromString:RNSResolveStringFromDict(dict, @"state", nil)];
+
   return [[RNSMenuItemUpdateOptions alloc] initWithTitle:title
                                                 hasTitle:hasTitle
                                                     icon:icon
                                                  hasIcon:hasIcon
                                           hasToggleState:hasToggleState
-                                             toggleState:toggleState];
+                                             toggleState:toggleState
+                                                hasState:hasState
+                                                   state:state];
 }
 
 + (RNSHeaderMenuItemData *)applyOptions:(RNSMenuItemUpdateOptions *)options toMenuItem:(RNSHeaderMenuItemData *)old
@@ -93,6 +104,7 @@ static RNSHeaderIconData
                                                disabled:old.disabled
                                             destructive:old.destructive
                                                itemType:old.itemType
+                                                  state:options.hasState ? options.state : old.state
                                      initialToggleState:old.initialToggleState
                                      keepsMenuPresented:old.keepsMenuPresented
                                                    icon:icon];
