@@ -10,7 +10,7 @@ export const SHEET_DIMMED_ALWAYS = -1;
 
 export function assertDetentsArrayIsSorted(array: number[]) {
   for (let i = 1; i < array.length; i++) {
-    if (array[i - 1] > array[i]) {
+    if (array[i - 1]! > array[i]!) {
       throw new Error(
         '[RNScreens] The detent array is not sorted in ascending order!',
       );

@@ -47,6 +47,12 @@ class ScreenStackHeaderSubviewManager :
         Log.w("[RNScreens]", "hidesSharedBackground prop is not available on Android")
     }
 
+    // Bar button transition identifiers only apply on iOS.
+    override fun setIdentifier(
+        view: ScreenStackHeaderSubview,
+        identifier: String?,
+    ) = Unit
+
     // synchronousShadowStateUpdatesEnabled is not available on Android atm,
     // however we must override their setters
     override fun setSynchronousShadowStateUpdatesEnabled(

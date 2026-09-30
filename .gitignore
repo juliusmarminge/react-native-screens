@@ -81,3 +81,6 @@ android/.settings
 # Generated release-test playgrounds 
 /release_tests
 
+
+# Generated provenance included in T3 package archives.
+/t3-fork.json

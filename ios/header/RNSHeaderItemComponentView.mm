@@ -73,6 +73,11 @@ namespace react = facebook::react;
   _menu = menuProp;
 }
 
+- (BOOL)searchBarPlacement
+{
+  return std::static_pointer_cast<const react::RNSHeaderItemIOSProps>(_props)->searchBarPlacement;
+}
+
 - (void)emitOnPress
 {
   [_headerItemEventEmitter emitOnPress];
@@ -191,7 +196,8 @@ RNS_IGNORE_SUPER_CALL_END
   const auto &newItemProps = *std::static_pointer_cast<const react::RNSHeaderItemIOSProps>(props);
   const auto &oldItemProps = *std::static_pointer_cast<const react::RNSHeaderItemIOSProps>(_props);
 
-  BOOL needsUpdate = oldItemProps.axisBehavior != newItemProps.axisBehavior;
+  BOOL needsUpdate = oldItemProps.searchBarPlacement != newItemProps.searchBarPlacement ||
+      oldItemProps.axisBehavior != newItemProps.axisBehavior;
   BOOL menuDidChange = NO;
 
   if (oldItemProps.itemId != newItemProps.itemId) {

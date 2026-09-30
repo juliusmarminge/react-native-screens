@@ -54,7 +54,12 @@ export const ScreenStackHeaderConfig = React.forwardRef<
     props.disableBottomInsetApplication ?? false,
   );
 
-  const { headerLeftBarButtonItems, headerRightBarButtonItems } = props;
+  const {
+    headerLeftBarButtonItems,
+    headerRightBarButtonItems,
+    headerCenterBarButtonItems,
+    headerToolbarItems,
+  } = props;
 
   const preparedHeaderLeftBarButtonItems =
     headerLeftBarButtonItems && isHeaderBarButtonsAvailableForCurrentPlatform
@@ -64,22 +69,36 @@ export const ScreenStackHeaderConfig = React.forwardRef<
     headerRightBarButtonItems && isHeaderBarButtonsAvailableForCurrentPlatform
       ? prepareHeaderBarButtonItems(headerRightBarButtonItems, 'right')
       : undefined;
+  const preparedHeaderCenterBarButtonItems =
+    headerCenterBarButtonItems && isHeaderBarButtonsAvailableForCurrentPlatform
+      ? prepareHeaderBarButtonItems(headerCenterBarButtonItems, 'center')
+      : undefined;
+  const preparedHeaderToolbarItems =
+    headerToolbarItems && isHeaderBarButtonsAvailableForCurrentPlatform
+      ? prepareHeaderBarButtonItems(headerToolbarItems, 'toolbar')
+      : undefined;
   const hasHeaderBarButtonItems =
     isHeaderBarButtonsAvailableForCurrentPlatform &&
     (preparedHeaderLeftBarButtonItems?.length ||
-      preparedHeaderRightBarButtonItems?.length);
+      preparedHeaderRightBarButtonItems?.length ||
+      preparedHeaderCenterBarButtonItems?.length ||
+      preparedHeaderToolbarItems?.length);
 
   // Handle bar button item presses
   const onPressHeaderBarButtonItem = hasHeaderBarButtonItems
     ? (event: NativeSyntheticEvent<{ buttonId: string }>) => {
-        const pressedItem = [
+        const buttonId = event.nativeEvent.buttonId;
+        const allItems = [
           ...(preparedHeaderLeftBarButtonItems ?? []),
           ...(preparedHeaderRightBarButtonItems ?? []),
-        ].find(
+          ...(preparedHeaderCenterBarButtonItems ?? []),
+          ...(preparedHeaderToolbarItems ?? []),
+        ];
+        const pressedItem = allItems.find(
           item =>
             item &&
             'buttonId' in item &&
-            item.buttonId === event.nativeEvent.buttonId,
+            item.buttonId === buttonId,
         );
         if (
           pressedItem &&
@@ -87,6 +106,32 @@ export const ScreenStackHeaderConfig = React.forwardRef<
           pressedItem.onPress
         ) {
           pressedItem.onPress();
+          return;
+        }
+        for (const item of allItems) {
+          if (!item || item.type !== 'mailSearchToolbar') {
+            continue;
+          }
+          if (item.filterButtonId === buttonId) {
+            item.onFilterPress?.();
+            return;
+          }
+          if (item.composeButtonId === buttonId) {
+            item.onComposePress?.();
+            return;
+          }
+          const searchTextChangePrefix = item.searchTextChangeId
+            ? `${item.searchTextChangeId}:`
+            : undefined;
+          if (
+            searchTextChangePrefix &&
+            buttonId.startsWith(searchTextChangePrefix)
+          ) {
+            item.onSearchTextChange?.(
+              buttonId.slice(searchTextChangePrefix.length),
+            );
+            return;
+          }
         }
       }
     : undefined;
@@ -117,6 +162,8 @@ export const ScreenStackHeaderConfig = React.forwardRef<
         const allItems = [
           ...(preparedHeaderLeftBarButtonItems ?? []),
           ...(preparedHeaderRightBarButtonItems ?? []),
+          ...(preparedHeaderCenterBarButtonItems ?? []),
+          ...(preparedHeaderToolbarItems ?? []),
         ];
         for (const item of allItems) {
           if (item && item.type === 'menu' && item.menu) {
@@ -124,6 +171,17 @@ export const ScreenStackHeaderConfig = React.forwardRef<
             if (action) {
               action.onPress();
               return;
+            }
+          } else if (item && item.type === 'mailSearchToolbar') {
+            const toolbarMenus = [item.filterMenu, item.composeMenu].filter(
+              Boolean,
+            );
+            for (const toolbarMenu of toolbarMenus) {
+              const action = toolbarMenu ? findInMenu(toolbarMenu, event.nativeEvent.menuId) : undefined;
+              if (action) {
+                action.onPress();
+                return;
+              }
             }
           }
         }
@@ -136,6 +194,8 @@ export const ScreenStackHeaderConfig = React.forwardRef<
       userInterfaceStyle={props.experimental_userInterfaceStyle}
       headerLeftBarButtonItems={preparedHeaderLeftBarButtonItems}
       headerRightBarButtonItems={preparedHeaderRightBarButtonItems}
+      headerCenterBarButtonItems={preparedHeaderCenterBarButtonItems}
+      headerToolbarItems={preparedHeaderToolbarItems}
       onPressHeaderBarButtonItem={onPressHeaderBarButtonItem}
       onPressHeaderBarButtonMenuItem={onPressHeaderBarButtonMenuItem}
       ref={ref}

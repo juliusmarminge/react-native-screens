@@ -124,6 +124,34 @@ class ScreenStackHeaderConfigViewManager :
         config.setTitle(title)
     }
 
+    // The t3 patch adds these iOS glass-chrome props to the native spec; they have
+    // no Android implementation, but the codegen-generated interface requires the
+    // setters to exist. No-ops keep the Android build compiling.
+    override fun setSubtitle(
+        config: ScreenStackHeaderConfig,
+        subtitle: String?,
+    ) = Unit
+
+    override fun setLargeSubtitle(
+        config: ScreenStackHeaderConfig,
+        largeSubtitle: String?,
+    ) = Unit
+
+    override fun setNavigationItemStyle(
+        config: ScreenStackHeaderConfig,
+        navigationItemStyle: String?,
+    ) = Unit
+
+    override fun setHeaderCenterBarButtonItems(
+        config: ScreenStackHeaderConfig,
+        headerCenterBarButtonItems: ReadableArray?,
+    ) = Unit
+
+    override fun setHeaderToolbarItems(
+        config: ScreenStackHeaderConfig,
+        headerToolbarItems: ReadableArray?,
+    ) = Unit
+
     override fun setTitleFontFamily(
         config: ScreenStackHeaderConfig,
         titleFontFamily: String?,

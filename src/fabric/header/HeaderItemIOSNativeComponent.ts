@@ -73,6 +73,7 @@ export interface NativeProps extends ViewProps {
   itemId?: string | undefined;
   identifier?: string | undefined;
   hidesSharedBackground?: CT.WithDefault<boolean, false>;
+  searchBarPlacement?: CT.WithDefault<boolean, false>;
   axisBehavior?: CT.WithDefault<
     'automatic' | 'horizontalOnly' | 'verticalPreferred',
     'automatic'

@@ -182,6 +182,8 @@ export interface StackHeaderInlineItemIOS
     SupportsIdentifierIOS,
     SupportsAxisBehaviorIOS,
     SupportsSharedBackgroundIOS {
+  /** Uses UIKit's search placement item on iOS 26 and later. */
+  searchBarPlacement?: boolean | undefined;
   /**
    * @summary Marks this object as a header item definition.
    *

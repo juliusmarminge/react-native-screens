@@ -12,7 +12,7 @@ export interface ResolvedImageAsset extends ImageResolvedAssetSource {}
 const prepareMenu = (
   menu: HeaderBarButtonItemWithMenu['menu'],
   index: number,
-  side: 'left' | 'right',
+  placement: 'left' | 'right' | 'center' | 'toolbar',
   path: string = '',
 ): HeaderBarButtonItemWithMenu['menu'] => {
   return {
@@ -39,7 +39,7 @@ const prepareMenu = (
           xcassetName,
           imageSource,
           templateSource,
-          ...prepareMenu(menuItem, index, side, currentPath),
+          ...prepareMenu(menuItem, index, placement, currentPath),
         };
       }
       return {
@@ -48,19 +48,52 @@ const prepareMenu = (
         xcassetName,
         imageSource,
         templateSource,
-        menuId: `${currentPath}-${index}-${side}`,
+        menuId: `${currentPath}-${index}-${placement}`,
       };
     }),
   };
 };
 
 export const prepareHeaderBarButtonItems = (
-  barButtonItems: HeaderBarButtonItem[],
-  side: 'left' | 'right',
+  barButtonItems:
+    | HeaderBarButtonItem[]
+    | HeaderBarButtonItem
+    | null
+    | undefined,
+  placement: 'left' | 'right' | 'center' | 'toolbar',
 ) => {
-  return barButtonItems?.map((item, index) => {
+  const items = Array.isArray(barButtonItems)
+    ? barButtonItems
+    : barButtonItems && typeof barButtonItems === 'object' && 'type' in barButtonItems
+      ? [barButtonItems]
+      : undefined;
+
+  return items?.map((item, index) => {
     if (item.type === 'spacing') {
       return item;
+    }
+    if (item.type === 'searchBarPlacement') {
+      if (placement !== 'toolbar') {
+        return null;
+      }
+      return {
+        ...item,
+        searchBarPlacement: true,
+      };
+    }
+    if (item.type === 'searchField') {
+      return {
+        ...item,
+        searchField: true,
+      };
+    }
+    if (item.type === 'mailSearchToolbar') {
+      return {
+        ...item,
+        mailSearchToolbar: true,
+        filterMenu: item.filterMenu ? prepareMenu(item.filterMenu, index, placement, 'filter') : undefined,
+        composeMenu: item.composeMenu ? prepareMenu(item.composeMenu, index, placement, 'compose') : undefined,
+      };
     }
     let imageSource: ResolvedImageAsset | undefined,
       templateSource: ResolvedImageAsset | undefined;
@@ -97,15 +130,15 @@ export const prepareHeaderBarButtonItems = (
     if (item.type === 'button') {
       return {
         ...processedItem,
-        buttonId: `${index}-${side}`,
+        buttonId: `${index}-${placement}`,
       };
     }
     if (item.type === 'menu') {
       return {
         ...processedItem,
-        menu: prepareMenu(item.menu, index, side),
+        menu: prepareMenu(item.menu, index, placement),
       };
     }
     return null;
-  });
+  }).filter(item => item !== null);
 };
