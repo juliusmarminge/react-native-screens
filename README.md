@@ -6,7 +6,7 @@ upstream, the split-stack prototype and the T3 integration changes. Keep generic
 fixes in their upstream proposal branches, then merge them into `t3/main`.
 
 To create an app dependency, increment `package.json` to a new `5.0.0-t3.N`
-version and commit all source changes. With Node 24 and the repository's pinned
+version, set `t3Fork.upstreamCommit` to the integrated upstream base and commit all source changes. With Node 24 and the repository's pinned
 Yarn, run `yarn pack:t3 /absolute/output/directory`. The command installs the
 locked dependencies, builds JavaScript and declarations, and packs the native
 sources. It requires a clean checkout and includes `t3-fork.json` with the source

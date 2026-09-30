@@ -1,6 +1,6 @@
 {
   "name": "react-native-screens",
-  "version": "5.0.0-t3.1",
+  "version": "5.0.0-t3.2",
   "description": "Native navigation primitives for your React Native app.",
   "scripts": {
     "submodules": "git submodule update --init --recursive && (cd react-navigation && yarn && yarn build && cd ../)",
@@ -242,5 +242,8 @@
       }
     }
   },
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.1.1",
+  "t3Fork": {
+    "upstreamCommit": "491e942e8b00bf440f0b54f6b129a4e4f0127c0f"
+  }
 }
