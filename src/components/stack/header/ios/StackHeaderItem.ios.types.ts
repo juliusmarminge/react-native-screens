@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import type { PlatformIconIOS } from '../../../shared/types';
 import type { StackHeaderMenuIOS } from './StackHeaderMenu.ios.types';
 import type { StackHeaderItemAxisBehaviorIOS } from '../StackHeaderConfig.ios.types';
+import type { StackHeaderItemVisibilityPriorityIOS } from '../StackHeaderConfig.ios.types';
 
 export type StackHeaderItemPlacement =
   | 'leading'
@@ -19,6 +20,7 @@ export type StackHeaderItemProps = {
   /** Uses UIKit's search placement item on iOS 26 and later. */
   searchBarPlacement?: boolean | undefined;
   axisBehavior?: StackHeaderItemAxisBehaviorIOS | undefined;
+  visibilityPriority?: StackHeaderItemVisibilityPriorityIOS | undefined;
   title?: string | undefined;
   icon?: PlatformIconIOS | undefined;
   render?: (() => ReactElement) | undefined;

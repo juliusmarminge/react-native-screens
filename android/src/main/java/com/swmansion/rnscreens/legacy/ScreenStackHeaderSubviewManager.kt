@@ -52,6 +52,12 @@ class ScreenStackHeaderSubviewManager :
         view: ScreenStackHeaderSubview,
         identifier: String?,
     ) = Unit
+    override fun setVisibilityPriority(
+        view: ScreenStackHeaderSubview,
+        visibilityPriority: String?,
+    ) {
+        Log.w("[RNScreens]", "visibilityPriority prop is not available on Android")
+    }
 
     // synchronousShadowStateUpdatesEnabled is not available on Android atm,
     // however we must override their setters

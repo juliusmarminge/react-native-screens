@@ -68,6 +68,8 @@ export type PlatformIconIOS =
   | PlatformIconIOSTemplate
   | PlatformIconShared;
 
+export type StackHeaderItemVisibilityPriorityIOS = 'low' | 'standard' | 'high';
+
 export interface NativeProps extends ViewProps {
   placement?: CT.WithDefault<Placement, 'trailing'>;
   itemId?: string | undefined;
@@ -77,6 +79,10 @@ export interface NativeProps extends ViewProps {
   axisBehavior?: CT.WithDefault<
     'automatic' | 'horizontalOnly' | 'verticalPreferred',
     'automatic'
+  >;
+  visibilityPriority?: CT.WithDefault<
+    StackHeaderItemVisibilityPriorityIOS,
+    'standard'
   >;
   title?: string | undefined;
   icon?: UnsafeMixed<PlatformIconIOS> | undefined;

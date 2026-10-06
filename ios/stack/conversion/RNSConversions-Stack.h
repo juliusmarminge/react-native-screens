@@ -8,6 +8,7 @@
 #import "RNSHeaderItemPlacement.h"
 #import "RNSHeaderItemSpacerPlacement.h"
 #import "RNSStackScreenProviding.h"
+#import "RNSHeaderItemVisibilityPriority.h"
 #include <type_traits>
 
 namespace react = facebook::react;
@@ -46,6 +47,17 @@ UINavigationItemBackButtonDisplayMode convert(
     react::RNSHeaderConfigIOSBackButtonDisplayMode displayMode);
 
 RNSStackScreenActivityMode RNSStackScreenActivityModeFromReactRNSStackScreenActivityMode(react::RNSStackScreenActivityMode mode);
+
+RNSHeaderItemVisibilityPriority
+RNSHeaderItemVisibilityPriorityFromReactRNSHeaderItemIOSVisibilityPriority(
+    react::RNSHeaderItemIOSVisibilityPriority visibilityPriority);
+
+#if RNS_IPHONE_OS_VERSION_AVAILABLE(27_0) && !TARGET_OS_TV && !TARGET_OS_VISION
+API_AVAILABLE(ios(27.0))
+UIBarButtonItemVisibilityPriority
+UIBarButtonItemVisibilityPriorityFromRNSHeaderItemVisibilityPriority(
+    RNSHeaderItemVisibilityPriority visibilityPriority);
+#endif // Check for iOS >= 27 && !TARGET_OS_TV && !TARGET_OS_VISION
 
 }; // namespace rnscreens::conversion
 

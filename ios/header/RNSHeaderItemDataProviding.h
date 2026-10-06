@@ -6,6 +6,7 @@
 #import "RNSHeaderItemAxisBehavior.h"
 #import "RNSHeaderItemPlacement.h"
 #import "RNSHeaderMenuData.h"
+#import "RNSHeaderItemVisibilityPriority.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -22,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) BOOL hidesSharedBackground;
 @property (nonatomic, readonly) BOOL searchBarPlacement;
 @property (nonatomic, readonly) RNSHeaderItemAxisBehavior axisBehavior;
+@property (nonatomic, readonly) RNSHeaderItemVisibilityPriority visibilityPriority;
 
 @end
 

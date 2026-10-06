@@ -1,6 +1,7 @@
 #import "RNSHeaderCoordinator.h"
 #import <React/RCTAssert.h>
 #import <React/RCTLog.h>
+#import "RNSConversions-Stack.h"
 #import "RNSDefines.h"
 #import "RNSSearchBar.h"
 #import "RNSHeaderContentFactory.h"
@@ -669,6 +670,16 @@
     barButtonItem.hidesSharedBackground = item.hidesSharedBackground;
   }
 #endif // RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
+
+// tvOS and visionOS are excluded on purpose: `visibilityPriority` exists there, but the only
+// supported value is `standard`, which is already the default.
+#if RNS_IPHONE_OS_VERSION_AVAILABLE(27_0) && !TARGET_OS_TV && !TARGET_OS_VISION
+  if (@available(iOS 27.0, *)) {
+    barButtonItem.visibilityPriority =
+        rnscreens::conversion::UIBarButtonItemVisibilityPriorityFromRNSHeaderItemVisibilityPriority(
+            item.visibilityPriority);
+  }
+#endif // RNS_IPHONE_OS_VERSION_AVAILABLE(27_0) && !TARGET_OS_TV && !TARGET_OS_VISION
 
   if (item.menu != nil && item.itemId != nil) {
     RNSHeaderMenuToggleStateTracker *tracker = [_trackerRegistry trackerForItemId:item.itemId];

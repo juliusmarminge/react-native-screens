@@ -7,6 +7,8 @@ import type {
   ViewProps,
 } from 'react-native';
 
+export type HeaderSubviewVisibilityPriority = 'low' | 'standard' | 'high';
+
 export type HeaderSubviewTypes =
   | 'back'
   | 'right'
@@ -19,6 +21,10 @@ export interface NativeProps extends ViewProps {
   type?: CT.WithDefault<HeaderSubviewTypes, 'left'>;
   hidesSharedBackground?: boolean | undefined;
   identifier?: string | undefined;
+  visibilityPriority?: CT.WithDefault<
+    HeaderSubviewVisibilityPriority,
+    'standard'
+  >;
   synchronousShadowStateUpdatesEnabled?: CT.WithDefault<boolean, true>;
 }
 

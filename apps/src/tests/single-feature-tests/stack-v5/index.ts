@@ -35,6 +35,7 @@ import TestStackHeaderMenuPresentationIOS from './test-stack-header-menu-present
 import TestStackHeaderMenuActionStateIOS from './test-stack-header-menu-action-state-ios';
 import TestStackHeaderItemIdentifierIOS from './test-stack-header-item-identifier-ios';
 import TestStackHeaderAxisBehaviorIOS from './test-stack-header-axis-behavior-ios';
+import TestStackHeaderItemVisibilityPriorityIOS from './test-stack-header-item-visibility-priority-ios';
 import TestStackHeaderTitleAppearanceAndroid from './test-stack-header-title-appearance-android';
 import TestStackHeaderTitleAppearanceIOS from './test-stack-header-title-appearance-ios';
 import TestStackHeaderBarColorsIOS from './test-stack-header-bar-colors-ios';
@@ -61,6 +62,7 @@ export { default as TestStackCustomTitleScrollEdgeIOS } from './test-stack-custo
 export { default as TestStackHeaderIconIOS } from './test-stack-header-icon-ios';
 export { default as TestStackHeaderItemIdentifierIOS } from './test-stack-header-item-identifier-ios';
 export { default as TestStackHeaderAxisBehaviorIOS } from './test-stack-header-axis-behavior-ios';
+export { default as TestStackHeaderItemVisibilityPriorityIOS } from './test-stack-header-item-visibility-priority-ios';
 export { default as TestStackHeaderMenuIOS } from './test-stack-header-menu-ios';
 export { default as TestStackHeaderMenuOptionsIOS } from './test-stack-header-menu-options-ios';
 export { default as TestStackHeaderMenuPresentationIOS } from './test-stack-header-menu-presentation-ios';
@@ -110,6 +112,7 @@ const scenarios = {
   TestStackHeaderIconIOS,
   TestStackHeaderItemIdentifierIOS,
   TestStackHeaderAxisBehaviorIOS,
+  TestStackHeaderItemVisibilityPriorityIOS,
   TestStackHeaderSubviewOnPress,
   TestStackHeaderSelectiveUpdates,
   TestStackHeaderMenuOptionsIOS,
