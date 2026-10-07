@@ -1,6 +1,7 @@
 #import "RNSStackNavigationController.h"
 #import <React/RCTAssert.h>
 #import "RNSContainer.h"
+#import "RNSDefines.h"
 #import "RNSContainerItem.h"
 #import "RNSLog.h"
 #import "RNSParentContainerItemRegistry.h"
