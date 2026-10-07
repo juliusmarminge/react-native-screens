@@ -2,22 +2,47 @@
 
 #import <React/RCTAssert.h>
 #import "RNSHeaderCoordinator.h"
+#import "RNSContainerItemSupport.h"
 #import "RNSSplitHostComponentView.h"
 #import "RNSSplitHostController.h"
 #import "RNSSplitScreenComponentView.h"
 
 @implementation RNSSplitScreenController {
   RNSSplitScreenComponentView *_splitScreenComponentView;
+  RNSContainerItemSupport *_containerItemSupport;
 }
 
 - (instancetype)initWithSplitScreenComponentView:(RNSSplitScreenComponentView *)splitScreenComponentView
 {
   if (self = [super init]) {
     _splitScreenComponentView = splitScreenComponentView;
+    _containerItemSupport = [RNSContainerItemSupport new];
     _headerCoordinator = [[RNSHeaderCoordinator alloc] initWithScreenController:self];
   }
 
   return self;
+}
+
+// Register nested stacks so column navigation can consult their removal guards.
+- (void)registerNestedContainer:(id<RNSContainer>)container
+{
+  [_containerItemSupport registerNestedContainer:container];
+}
+
+- (void)unregisterNestedContainer:(id<RNSContainer>)container
+{
+  [_containerItemSupport unregisterNestedContainer:container];
+}
+
+- (nullable id<RNSContainer>)resolveNestedContainer
+{
+  return [_containerItemSupport resolveNestedContainer];
+}
+
+- (nullable UIScrollView *)findContentScrollView
+{
+  return [_containerItemSupport findContentScrollViewWithCachedScrollView:nil
+                                                            heuristicRoot:_splitScreenComponentView];
 }
 
 /**

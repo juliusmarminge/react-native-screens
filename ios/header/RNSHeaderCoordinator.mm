@@ -53,6 +53,11 @@
     return;
   }
 
+  // The visible screen owns the shared bar tint, including after a native pop.
+  navController.navigationBar.tintColor = _configDataProvider.tintColor;
+#if !TARGET_OS_TV
+  navController.toolbar.tintColor = _configDataProvider.tintColor;
+#endif
   BOOL hidden = _configDataProvider == nil || _configDataProvider.hidden;
   [navController.navigationBarCoordinator setHidden:hidden forNavigationController:navController animated:animated];
 }

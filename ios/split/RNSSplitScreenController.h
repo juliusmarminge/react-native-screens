@@ -1,6 +1,7 @@
 #pragma once
 
 #import <UIKit/UIKit.h>
+#import "RNSContainerItem.h"
 
 @class RNSSplitScreenComponentView;
 @class RNSSplitScreenController;
@@ -43,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Associated with a RNSSplitScreenComponentView, it observes the column layout and lifecycle, reports them to its
  * delegate, and interacts with the SplitHost hierarchy.
  */
-@interface RNSSplitScreenController : UIViewController
+@interface RNSSplitScreenController : UIViewController <RNSContainerItem>
 
 @property (nonatomic, weak, nullable) id<RNSSplitScreenControllerDelegate> delegate;
 
