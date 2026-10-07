@@ -85,7 +85,10 @@ namespace react = facebook::react;
       [_stackOperationCoordinator addPushOperation:stackScreen];
       break;
     case RNSStackScreenActivityModeDetached:
-      [_stackOperationCoordinator addPopOperation:stackScreen];
+      // The React update acknowledging a completed native pop must not pop again.
+      if (!stackScreen.isNativelyDismissed) {
+        [_stackOperationCoordinator addPopOperation:stackScreen];
+      }
       break;
     default:
       RCTAssert(NO, @"[RNScreens] Unexpected value of activityMode: %d", stackScreen.activityMode);
