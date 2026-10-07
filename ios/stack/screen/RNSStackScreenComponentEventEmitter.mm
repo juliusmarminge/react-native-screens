@@ -74,6 +74,15 @@
   }
 }
 
+- (BOOL)emitOnNativeDismissPrevented
+{
+  if (_reactEventEmitter != nullptr) {
+    _reactEventEmitter->onNativeDismissPrevented({});
+    return YES;
+  }
+  return NO;
+}
+
 - (void)updateEventEmitter:(const std::shared_ptr<const react::RNSStackScreenEventEmitter> &)emitter
 {
   _reactEventEmitter = emitter;

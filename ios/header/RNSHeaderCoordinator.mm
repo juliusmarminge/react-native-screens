@@ -499,6 +499,12 @@
   }
 #endif
 
+  if (controller.navigationController.topViewController == controller) {
+    controller.navigationController.navigationBar.tintColor = _configDataProvider.tintColor;
+#if !TARGET_OS_TV
+    controller.navigationController.toolbar.tintColor = _configDataProvider.tintColor;
+#endif
+  }
   navItem.title = _configDataProvider.title;
   navItem.standardAppearance = _configDataProvider.standardAppearance;
   navItem.scrollEdgeAppearance = _configDataProvider.scrollEdgeAppearance;

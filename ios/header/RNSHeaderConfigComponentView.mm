@@ -78,6 +78,7 @@ static void RNSAssertIsValidHeaderChild(UIView *child)
   _title = nil;
   _subtitle = nil;
   _hidden = NO;
+  _tintColor = nil;
   _backButtonHidden = NO;
 #if RNS_IPHONE_OS_VERSION_AVAILABLE(16_0) && !TARGET_OS_TV
   if (@available(iOS 16.0, *)) {
@@ -451,6 +452,10 @@ static void RNSAssertIsValidHeaderChild(UIView *child)
   const auto &oldHeaderProps = *std::static_pointer_cast<const react::RNSHeaderConfigIOSProps>(_props);
 
   BOOL titleMenuDidChange = NO;
+
+  if (oldHeaderProps.tintColor != newHeaderProps.tintColor) {
+    _tintColor = RCTUIColorFromSharedColor(newHeaderProps.tintColor);
+  }
 
   if (oldHeaderProps.title != newHeaderProps.title) {
     _title = RCTNSStringFromStringNilIfEmpty(newHeaderProps.title);

@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)emitOnDidDisappear;
 - (BOOL)emitOnDismiss;
 - (BOOL)emitOnNativeDismiss;
+- (BOOL)emitOnNativeDismissPrevented;
 
 @end
 

@@ -4,6 +4,7 @@ import type {
   CodegenTypes as CT,
   HostComponent,
   ProcessedColorValue,
+  ColorValue,
   ViewProps,
 } from 'react-native';
 import { codegenNativeCommands, codegenNativeComponent } from 'react-native';
@@ -51,6 +52,8 @@ export interface NativeProps extends ViewProps {
   hidden?: CT.WithDefault<boolean, false>;
   transparent?: CT.WithDefault<boolean, false>;
   backButtonHidden?: CT.WithDefault<boolean, false>;
+
+  tintColor?: ColorValue | undefined;
 
   // iOS-specific props
   navigationItemStyle?: CT.WithDefault<NavigationItemStyle, 'navigator'>;

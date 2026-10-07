@@ -65,6 +65,7 @@ function StackHeaderConfig(
     largeSubtitle,
     largeTitleEnabled,
     navigationItemStyle,
+    tintColor,
     prompt,
     backButtonTitle,
     backButtonDisplayMode,
@@ -174,6 +175,7 @@ function StackHeaderConfig(
       backButtonDisplayMode={backButtonDisplayMode}
       backButtonMenuEnabled={backButtonMenuEnabled}
       navigationItemStyle={navigationItemStyle}
+      tintColor={tintColor}
       largeTitle={largeTitle}
       largeSubtitle={largeSubtitle}
       largeTitleEnabled={!!largeTitleEnabled}

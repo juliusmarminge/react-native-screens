@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, readonly, nullable) RNSHeaderConfigComponentView *headerConfig;
 @property (nonatomic, strong, readonly, nonnull) RNSStackScreenController *controller;
 @property (nonatomic) BOOL isNativelyDismissed;
+@property (nonatomic, readonly) BOOL preventNativeDismiss;
 
 @end
 

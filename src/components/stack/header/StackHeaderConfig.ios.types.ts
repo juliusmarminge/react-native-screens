@@ -548,6 +548,8 @@ export interface StackHeaderAppearanceIOS {
 }
 
 export interface StackHeaderConfigPropsIOS {
+  /** Tint for native back buttons, header items and toolbar items. */
+  tintColor?: ColorValue | undefined;
   /**
    * @summary Search bar displayed in the native navigation header.
    *

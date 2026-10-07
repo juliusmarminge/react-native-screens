@@ -6,13 +6,59 @@
 #import "RNSParentContainerItemRegistry.h"
 #import "RNSStackNavigationBar.h"
 #import "RNSStackOperation.h"
+#import "RNSStackScreenComponentEventEmitter.h"
+#import "RNSStackScreenComponentView.h"
 #import "RNSViewFrameChangeDelegate.h"
+
+@interface RNSStackNavigationController ()
+- (BOOL)shouldPreventNativePopToController:(UIViewController *)controller;
+@end
+
+#if !TARGET_OS_TV
+@interface RNSStackPopGestureDelegate : NSObject <UIGestureRecognizerDelegate>
+@property (nonatomic, weak) RNSStackNavigationController *navigationController;
+@property (nonatomic, weak) id<UIGestureRecognizerDelegate> originalDelegate;
+@end
+
+@implementation RNSStackPopGestureDelegate
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+{
+  RNSStackNavigationController *navigation = self.navigationController;
+  if (navigation.viewControllers.count < 2)
+    return NO;
+  UIViewController *destination = navigation.viewControllers[navigation.viewControllers.count - 2];
+  if ([navigation shouldPreventNativePopToController:destination])
+    return NO;
+  if ([self.originalDelegate respondsToSelector:_cmd]) {
+    return [self.originalDelegate gestureRecognizerShouldBegin:gestureRecognizer];
+  }
+  return YES;
+}
+
+- (BOOL)respondsToSelector:(SEL)selector
+{
+  return [super respondsToSelector:selector] || [self.originalDelegate respondsToSelector:selector];
+}
+
+- (id)forwardingTargetForSelector:(SEL)selector
+{
+  return self.originalDelegate;
+}
+@end
+#endif
 
 @implementation RNSStackNavigationController {
   NSMutableArray<RNSPushOperation *> *_Nonnull _pendingPushOperations;
   NSMutableArray<RNSPopOperation *> *_Nonnull _pendingPopOperations;
   RNSParentContainerItemRegistry *_Nonnull _parentContainerRegistry;
   UIViewController *_emptyStackController;
+  BOOL _performingReactUpdate;
+#if !TARGET_OS_TV
+  RNSStackPopGestureDelegate *_edgePopDelegate;
+#if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
+  RNSStackPopGestureDelegate *_contentPopDelegate;
+#endif
+#endif
 }
 
 - (instancetype)init
@@ -28,6 +74,81 @@
     [self initState];
   }
   return self;
+}
+
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
+#if !TARGET_OS_TV
+  _edgePopDelegate = [RNSStackPopGestureDelegate new];
+  _edgePopDelegate.navigationController = self;
+  _edgePopDelegate.originalDelegate = self.interactivePopGestureRecognizer.delegate;
+  self.interactivePopGestureRecognizer.delegate = _edgePopDelegate;
+#if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
+  if (@available(iOS 26.0, *)) {
+    _contentPopDelegate = [RNSStackPopGestureDelegate new];
+    _contentPopDelegate.navigationController = self;
+    _contentPopDelegate.originalDelegate = self.interactiveContentPopGestureRecognizer.delegate;
+    self.interactiveContentPopGestureRecognizer.delegate = _contentPopDelegate;
+  }
+#endif
+#endif
+}
+
+// A parent column can be popped while its nested stack owns the guarded route.
+- (RNSStackScreenComponentView *)preventedScreenInController:(UIViewController *)controller
+{
+  if ([controller.view isKindOfClass:RNSStackScreenComponentView.class]) {
+    RNSStackScreenComponentView *screen = (RNSStackScreenComponentView *)controller.view;
+    if (screen.activityMode == RNSStackScreenActivityModeAttached && screen.preventNativeDismiss)
+      return screen;
+  }
+  if ([controller conformsToProtocol:@protocol(RNSContainerItem)]) {
+    id<RNSContainer> nested = [(id<RNSContainerItem>)controller resolveNestedContainer];
+    if ([nested isKindOfClass:UINavigationController.class]) {
+      return [self preventedScreenInController:((UINavigationController *)nested).topViewController];
+    }
+  }
+  return nil;
+}
+
+- (BOOL)shouldPreventNativePopToController:(UIViewController *)controller
+{
+  if (_performingReactUpdate)
+    return NO;
+  NSUInteger destinationIndex = [self.viewControllers indexOfObject:controller];
+  if (destinationIndex == NSNotFound)
+    return NO;
+  for (NSUInteger index = self.viewControllers.count; index > destinationIndex + 1; index--) {
+    RNSStackScreenComponentView *screen = [self preventedScreenInController:self.viewControllers[index - 1]];
+    if (screen != nil) {
+      [screen.reactEventEmitter emitOnNativeDismissPrevented];
+      return YES;
+    }
+  }
+  return NO;
+}
+
+- (UIViewController *)popViewControllerAnimated:(BOOL)animated
+{
+  if (self.viewControllers.count > 1 &&
+      [self shouldPreventNativePopToController:self.viewControllers[self.viewControllers.count - 2]])
+    return nil;
+  return [super popViewControllerAnimated:animated];
+}
+
+- (NSArray<UIViewController *> *)popToViewController:(UIViewController *)controller animated:(BOOL)animated
+{
+  if ([self shouldPreventNativePopToController:controller])
+    return nil;
+  return [super popToViewController:controller animated:animated];
+}
+
+- (NSArray<UIViewController *> *)popToRootViewControllerAnimated:(BOOL)animated
+{
+  if ([self shouldPreventNativePopToController:self.viewControllers.firstObject])
+    return nil;
+  return [super popToRootViewControllerAnimated:animated];
 }
 
 - (void)initState
@@ -129,6 +250,7 @@
     return;
   }
 
+  _performingReactUpdate = YES;
   for ([[maybe_unused]] RNSPopOperation *op in _pendingPopOperations) {
     RCTAssert(
         self.allowsEmptyStack ? !self.isStackEmpty : [self.viewControllers count] > 1,
@@ -156,6 +278,7 @@
       self.allowsEmptyStack || [self.viewControllers count] > 0,
       @"[RNScreens] Stack should never be empty after updates");
 
+  _performingReactUpdate = NO;
   [self dumpStackModel];
 
   [_pendingPopOperations removeAllObjects];

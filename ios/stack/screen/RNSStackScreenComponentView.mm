@@ -64,6 +64,7 @@ namespace react = facebook::react;
   // container state
   _screenKey = nil;
   _activityMode = RNSStackScreenActivityModeDetached;
+  _preventNativeDismiss = NO;
 }
 
 - (void)setupController
@@ -127,6 +128,8 @@ namespace react = facebook::react;
         newComponentProps.activityMode);
     _hasUpdatedActivityMode = YES;
   }
+
+  _preventNativeDismiss = newComponentProps.preventNativeDismiss;
 
   if (oldComponentProps.screenKey != newComponentProps.screenKey) {
     RCTAssert(_screenKey == nil, @"[RNScreens] ScreenController cannot change its screenKey");
