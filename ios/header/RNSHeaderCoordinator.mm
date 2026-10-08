@@ -3,13 +3,13 @@
 #import <React/RCTLog.h>
 #import "RNSConversions-Stack.h"
 #import "RNSDefines.h"
-#import "RNSSearchBar.h"
 #import "RNSHeaderContentFactory.h"
 #import "RNSHeaderItemDataProviding.h"
 #import "RNSHeaderItemSpacerDataProviding.h"
 #import "RNSHeaderMenuCoordinator.h"
 #import "RNSHeaderMenuFinder.h"
 #import "RNSHeaderMenuTrackerRegistry.h"
+#import "RNSSearchBar.h"
 #import "RNSStackNavigationBarCoordinator.h"
 #import "RNSStackNavigationController.h"
 
@@ -668,9 +668,9 @@
 #endif
   if (barButtonItem == nil) {
     barButtonItem = [RNSHeaderContentFactory barButtonItemForHeaderItem:item
-                                                               withFrameChangeDelegate:_frameChangeDelegate
-                                                              withHeaderEventsDelegate:_eventsDelegate
-                                                                       withImageLoader:_imageLoader];
+                                                withFrameChangeDelegate:_frameChangeDelegate
+                                               withHeaderEventsDelegate:_eventsDelegate
+                                                        withImageLoader:_imageLoader];
   }
 
 #if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
@@ -691,6 +691,24 @@
             item.visibilityPriority);
   }
 #endif // RNS_IPHONE_OS_VERSION_AVAILABLE(27_0) && !TARGET_OS_TV && !TARGET_OS_VISION
+
+  // Search placement items are created by UIKit, so apply axis behavior here
+  // alongside the ordinary items created by the content factory.
+#if RNS_IPHONE_OS_VERSION_AVAILABLE(27_1) && !TARGET_OS_TV && !TARGET_OS_VISION
+  if (@available(iOS 27.1, *)) {
+    switch (item.axisBehavior) {
+      case RNSHeaderItemAxisBehaviorAutomatic:
+        barButtonItem.axisBehavior = UIBarButtonItemAxisBehaviorAutomatic;
+        break;
+      case RNSHeaderItemAxisBehaviorHorizontalOnly:
+        barButtonItem.axisBehavior = UIBarButtonItemAxisBehaviorHorizontalOnly;
+        break;
+      case RNSHeaderItemAxisBehaviorVerticalPreferred:
+        barButtonItem.axisBehavior = UIBarButtonItemAxisBehaviorVerticalPreferred;
+        break;
+    }
+  }
+#endif // RNS_IPHONE_OS_VERSION_AVAILABLE(27_1) && !TARGET_OS_TV && !TARGET_OS_VISION
 
   if (item.menu != nil && item.itemId != nil) {
     RNSHeaderMenuToggleStateTracker *tracker = [_trackerRegistry trackerForItemId:item.itemId];
