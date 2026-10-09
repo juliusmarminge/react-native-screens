@@ -1,5 +1,7 @@
 #import "RNSStackNavigationController.h"
 #import <React/RCTAssert.h>
+#import <React/RCTSurfaceTouchHandler.h>
+#import "RCTSurfaceTouchHandler+RNSUtility.h"
 #import "RNSContainer.h"
 #import "RNSDefines.h"
 #import "RNSContainerItem.h"
@@ -85,16 +87,37 @@
   _edgePopDelegate.navigationController = self;
   _edgePopDelegate.originalDelegate = self.interactivePopGestureRecognizer.delegate;
   self.interactivePopGestureRecognizer.delegate = _edgePopDelegate;
+  [self.interactivePopGestureRecognizer addTarget:self action:@selector(cancelReactTouchesForPopGesture:)];
 #if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
   if (@available(iOS 26.0, *)) {
     _contentPopDelegate = [RNSStackPopGestureDelegate new];
     _contentPopDelegate.navigationController = self;
     _contentPopDelegate.originalDelegate = self.interactiveContentPopGestureRecognizer.delegate;
     self.interactiveContentPopGestureRecognizer.delegate = _contentPopDelegate;
+    [self.interactiveContentPopGestureRecognizer addTarget:self action:@selector(cancelReactTouchesForPopGesture:)];
   }
 #endif
 #endif
 }
+
+#if !TARGET_OS_TV
+- (void)cancelReactTouchesForPopGesture:(UIGestureRecognizer *)gestureRecognizer
+{
+  if (gestureRecognizer.state != UIGestureRecognizerStateBegan)
+    return;
+
+  // A recognized back swipe consumes the active press, including when the pop
+  // later cancels. Find the nearest RN handler in roots, sheets, or split columns.
+  for (UIView *view = gestureRecognizer.view; view != nil; view = view.superview) {
+    for (UIGestureRecognizer *recognizer in view.gestureRecognizers) {
+      if ([recognizer isKindOfClass:RCTSurfaceTouchHandler.class]) {
+        [(RCTSurfaceTouchHandler *)recognizer rnscreens_cancelTouches];
+        return;
+      }
+    }
+  }
+}
+#endif
 
 // A parent column can be popped while its nested stack owns the guarded route.
 - (RNSStackScreenComponentView *)preventedScreenInController:(UIViewController *)controller
