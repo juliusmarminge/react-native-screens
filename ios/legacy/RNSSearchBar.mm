@@ -109,6 +109,10 @@ static id RNSAddObserverRemovedWithSearchField(
   UISearchController *_controller;
   UIColor *_textColor;
   BOOL _focusRequested;
+  BOOL _programmaticDismissal;
+  BOOL _cancelReported;
+  BOOL _dismissalIsNavigation;
+  NSString *_lastSearchText;
 
   // We use those booleans to log a warning if user attempts to restore
   // default behavior after setting explicit value for the prop.
@@ -155,6 +159,9 @@ static id RNSAddObserverRemovedWithSearchField(
 #endif
 
   _controller.searchBar.delegate = self;
+  _controller.delegate = self;
+  _controller.searchResultsUpdater = self;
+  _lastSearchText = @"";
 
   _isObscureBackgroundSet = NO;
   _isHideNavigationBarSet = NO;
@@ -368,6 +375,58 @@ static id RNSAddObserverRemovedWithSearchField(
 
 #pragma mark delegate methods
 
+- (BOOL)searchHostIsNavigating
+{
+  UIViewController *host = _controller.presentingViewController;
+  UINavigationController *navigation = host.navigationController;
+  id<UIViewControllerTransitionCoordinator> transition = navigation.transitionCoordinator;
+  // The search controller's own presentation is not a navigation away from its host.
+  BOOL changingScreens = transition != nil &&
+      [transition viewControllerForKey:UITransitionContextFromViewControllerKey] != _controller &&
+      [transition viewControllerForKey:UITransitionContextToViewControllerKey] != _controller;
+  return host.isBeingDismissed || host.isMovingFromParentViewController ||
+      (navigation != nil && (navigation.topViewController != host || changingScreens));
+}
+
+- (void)willPresentSearchController:(UISearchController *)searchController
+{
+  _programmaticDismissal = NO;
+  _cancelReported = NO;
+  _dismissalIsNavigation = NO;
+}
+
+- (void)willDismissSearchController:(UISearchController *)searchController
+{
+  _dismissalIsNavigation = [self searchHostIsNavigating];
+}
+
+- (void)didDismissSearchController:(UISearchController *)searchController
+{
+#if !TARGET_OS_TV
+  // Integrated search can replace its field when collapsing, while its header stays mounted.
+  UIView *header =
+      [self.navigationItemDelegate isKindOfClass:UIView.class] ? (UIView *)self.navigationItemDelegate : nil;
+  if (!_programmaticDismissal && !_cancelReported && !_dismissalIsNavigation && ![self searchHostIsNavigating] &&
+      (searchController.searchBar.window != nil || header.window != nil) &&
+      searchController.searchBar.text.length == 0) {
+    [self searchBarCancelButtonClicked:searchController.searchBar];
+  }
+#endif
+}
+
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController
+{
+  // UIKit also updates results for programmatic restoration and during navigation.
+  if (_programmaticDismissal || _dismissalIsNavigation || [self searchHostIsNavigating]) {
+    return;
+  }
+  NSString *text = searchController.searchBar.text ?: @"";
+  if (![_lastSearchText isEqualToString:text]) {
+    _lastSearchText = [text copy];
+    [self emitOnChangeTextEventWithText:text];
+  }
+}
+
 - (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar
 {
 #if !TARGET_OS_TV
@@ -391,7 +450,7 @@ static id RNSAddObserverRemovedWithSearchField(
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
 {
-  [self emitOnChangeTextEventWithText:_controller.searchBar.text];
+  [self updateSearchResultsForSearchController:_controller];
 }
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
@@ -402,13 +461,20 @@ static id RNSAddObserverRemovedWithSearchField(
 #if !TARGET_OS_TV
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
 {
+  if (_cancelReported) {
+    return;
+  }
+  _cancelReported = YES;
   _focusRequested = NO;
-  _controller.searchBar.text = @"";
+  BOOL textChanged = ![_lastSearchText isEqualToString:@""];
+  [self setText:@""];
   [self resignFirstResponder];
   [self hideCancelButton];
 
   [self emitOnCancelButtonPressEvent];
-  [self emitOnChangeTextEventWithText:_controller.searchBar.text];
+  if (textChanged) {
+    [self emitOnChangeTextEventWithText:_controller.searchBar.text];
+  }
 }
 #endif // !TARGET_OS_TV
 
@@ -445,7 +511,7 @@ static id RNSAddObserverRemovedWithSearchField(
 
 - (void)clearText
 {
-  [_controller.searchBar setText:@""];
+  [self setText:@""];
 }
 
 - (void)toggleCancelButton:(BOOL)flag
@@ -457,6 +523,7 @@ static id RNSAddObserverRemovedWithSearchField(
 
 - (void)setText:(NSString *)text
 {
+  _lastSearchText = [text copy] ?: @"";
   [_controller.searchBar setText:text];
 }
 
@@ -464,6 +531,9 @@ static id RNSAddObserverRemovedWithSearchField(
 {
   if (!active) {
     _focusRequested = NO;
+    _programmaticDismissal = YES;
+  } else {
+    _programmaticDismissal = NO;
   }
   // Search can remain expanded after the keyboard is dismissed or its host reappears.
   // Becoming first responder belongs to the separate focus command.
