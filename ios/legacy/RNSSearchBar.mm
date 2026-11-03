@@ -109,6 +109,9 @@ static id RNSAddObserverRemovedWithSearchField(
   UISearchController *_controller;
   UIColor *_textColor;
   BOOL _focusRequested;
+  BOOL _programmaticDismissal;
+  BOOL _userDismissal;
+  BOOL _cancelReported;
 
   // We use those booleans to log a warning if user attempts to restore
   // default behavior after setting explicit value for the prop.
@@ -155,6 +158,7 @@ static id RNSAddObserverRemovedWithSearchField(
 #endif
 
   _controller.searchBar.delegate = self;
+  _controller.delegate = self;
 
   _isObscureBackgroundSet = NO;
   _isHideNavigationBarSet = NO;
@@ -368,6 +372,48 @@ static id RNSAddObserverRemovedWithSearchField(
 
 #pragma mark delegate methods
 
+- (BOOL)searchHostIsNavigating
+{
+  UIViewController *host = _controller.presentingViewController;
+  UINavigationController *navigation = host.navigationController;
+  id<UIViewControllerTransitionCoordinator> transition = navigation.transitionCoordinator;
+  // The search controller's own presentation is not a navigation away from its host.
+  BOOL changingScreens = transition != nil &&
+      [transition viewControllerForKey:UITransitionContextFromViewControllerKey] != _controller &&
+      [transition viewControllerForKey:UITransitionContextToViewControllerKey] != _controller;
+  return host.isBeingDismissed || host.isMovingFromParentViewController ||
+      (navigation != nil && (navigation.topViewController != host || changingScreens));
+}
+
+- (void)willPresentSearchController:(UISearchController *)searchController
+{
+  _programmaticDismissal = NO;
+  _cancelReported = NO;
+}
+
+- (void)willDismissSearchController:(UISearchController *)searchController
+{
+  // The presenting controller is gone by the time dismissal finishes.
+  _userDismissal = !_programmaticDismissal && ![self searchHostIsNavigating];
+}
+
+- (void)didDismissSearchController:(UISearchController *)searchController
+{
+#if !TARGET_OS_TV
+  // iOS 27's integrated close button clears and dismisses search without calling the cancel delegate.
+  // A dismissal that keeps its text, or follows navigation or setActive(false), is not a cancel.
+  // Integrated search can replace its field when collapsing, while its header stays mounted.
+  UIView *header =
+      [self.navigationItemDelegate isKindOfClass:UIView.class] ? (UIView *)self.navigationItemDelegate : nil;
+  if (_userDismissal && !_cancelReported && ![self searchHostIsNavigating] &&
+      searchController.searchBar.text.length == 0 &&
+      (searchController.searchBar.window != nil || header.window != nil)) {
+    [self searchBarCancelButtonClicked:searchController.searchBar];
+  }
+#endif
+  _userDismissal = NO;
+}
+
 - (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar
 {
 #if !TARGET_OS_TV
@@ -402,6 +448,7 @@ static id RNSAddObserverRemovedWithSearchField(
 #if !TARGET_OS_TV
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
 {
+  _cancelReported = YES;
   _focusRequested = NO;
   _controller.searchBar.text = @"";
   [self resignFirstResponder];
@@ -465,6 +512,7 @@ static id RNSAddObserverRemovedWithSearchField(
   if (!active) {
     _focusRequested = NO;
   }
+  _programmaticDismissal = !active;
   // Search can remain expanded after the keyboard is dismissed or its host reappears.
   // Becoming first responder belongs to the separate focus command.
   _controller.active = active;

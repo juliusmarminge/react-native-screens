@@ -32,9 +32,9 @@ function SearchScreen({ name }: { name: string }) {
   const [headerMounted, setHeaderMounted] = useState(true);
   const [version, setVersion] = useState(0);
   const [hideWhenScrolling, setHideWhenScrolling] = useState(false);
-  const [placement, setPlacement] = useState<'stacked' | 'automatic'>(
-    'stacked',
-  );
+  const [placement, setPlacement] = useState<
+    'stacked' | 'automatic' | 'integratedButton'
+  >('stacked');
   const [focusEvent, setFocusEvent] = useState<'none' | 'focus' | 'blur'>(
     'none',
   );
@@ -184,7 +184,11 @@ function SearchScreen({ name }: { name: string }) {
               title={`Placement: ${placement}`}
               onPress={() =>
                 setPlacement(value =>
-                  value === 'stacked' ? 'automatic' : 'stacked',
+                  value === 'stacked'
+                    ? 'automatic'
+                    : value === 'automatic'
+                    ? 'integratedButton'
+                    : 'stacked',
                 )
               }
             />
