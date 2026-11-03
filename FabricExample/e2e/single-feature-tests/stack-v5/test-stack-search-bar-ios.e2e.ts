@@ -69,13 +69,18 @@ describeIfIOS('Stack search bar (iOS)', () => {
     await tapControl('focus-search');
     await searchField().typeText('query');
     await searchField().tapReturnKey();
+    await expect(element(by.id('search-submit'))).toHaveText(
+      'Submitted: query',
+    );
+    // Return keeps the field focused; apps that submit blur it themselves.
+    await tapControl('blur-search');
     await expectUnfocused();
     await expect(searchField()).toHaveText('query');
     await expect(element(by.id('search-cancel'))).toHaveText('Cancelled: 0');
     await tapControl('focus-search');
     await closeIntegratedSearch().tap();
     await expect(element(by.id('search-cancel'))).toHaveText('Cancelled: 1');
-    await expect(element(by.id('search-text'))).toHaveText('Text: ');
+    await expect(element(by.id('search-text'))).toHaveText('Text: (empty)');
     await tapControl('focus-search');
     await searchField().typeText('kept');
     await tapControl('push-details');

@@ -102,7 +102,9 @@ function SearchScreen({ name }: { name: string }) {
           contentContainerStyle={{ padding: 16, gap: 8 }}>
           <Text testID="search-screen-name">{name}</Text>
           <Text testID="search-focus">Last focus event: {focusEvent}</Text>
-          <Text testID="search-text">Text: {text}</Text>
+          <Text testID="search-text">
+            Text: {text === '' ? '(empty)' : text}
+          </Text>
           <Text testID="search-submit">Submitted: {submitted}</Text>
           <Text testID="search-cancel">Cancelled: {cancelCount}</Text>
           <Text testID="filter-count">Filters: {filterCount}</Text>
