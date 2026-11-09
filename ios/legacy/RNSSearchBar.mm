@@ -401,14 +401,17 @@ static id RNSAddObserverRemovedWithSearchField(
 {
 #if !TARGET_OS_TV
   // iOS 27's integrated close button clears and dismisses search without calling the cancel delegate.
+  // Earlier versions call it themselves, and their tab switches also dismiss with an empty field.
   // A dismissal that keeps its text, or follows navigation or setActive(false), is not a cancel.
   // Integrated search can replace its field when collapsing, while its header stays mounted.
-  UIView *header =
-      [self.navigationItemDelegate isKindOfClass:UIView.class] ? (UIView *)self.navigationItemDelegate : nil;
-  if (_userDismissal && !_cancelReported && ![self searchHostIsNavigating] &&
-      searchController.searchBar.text.length == 0 &&
-      (searchController.searchBar.window != nil || header.window != nil)) {
-    [self searchBarCancelButtonClicked:searchController.searchBar];
+  if (@available(iOS 27.0, *)) {
+    UIView *header =
+        [self.navigationItemDelegate isKindOfClass:UIView.class] ? (UIView *)self.navigationItemDelegate : nil;
+    if (_userDismissal && !_cancelReported && ![self searchHostIsNavigating] &&
+        searchController.searchBar.text.length == 0 &&
+        (searchController.searchBar.window != nil || header.window != nil)) {
+      [self searchBarCancelButtonClicked:searchController.searchBar];
+    }
   }
 #endif
   _userDismissal = NO;
