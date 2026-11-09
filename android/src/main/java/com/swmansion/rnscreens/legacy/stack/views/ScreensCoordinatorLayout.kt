@@ -1,11 +1,15 @@
 package com.swmansion.rnscreens.legacy.stack.views
 
 import android.content.Context
+import android.content.res.Configuration
+import android.view.Gravity
 import android.view.WindowInsets
 import android.view.animation.Animation
 import android.view.animation.AnimationSet
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.facebook.react.uimanager.ReactPointerEventsView
+import com.swmansion.rnscreens.core.modals.formsheet.FormSheetPlacement
+import com.swmansion.rnscreens.core.modals.formsheet.FormSheetPostureObserver
 import com.swmansion.rnscreens.legacy.PointerEventsBoxNoneImpl
 import com.swmansion.rnscreens.legacy.ScreenStackFragment
 import com.swmansion.rnscreens.legacy.bottomsheet.usesFormSheetPresentation
@@ -22,6 +26,20 @@ internal class ScreensCoordinatorLayout(
         fragment,
         PointerEventsBoxNoneImpl(),
     )
+
+    private var lastSheetWidth = 0
+
+    private val posture = FormSheetPostureObserver({ fragment.screen.reactContext.currentActivity }) { requestLayout() }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (fragment.screen.usesFormSheetPresentation()) posture.start()
+    }
+
+    override fun onDetachedFromWindow() {
+        posture.stop()
+        super.onDetachedFromWindow()
+    }
 
     internal var blockFrameworkTransitionFinalization = false
     internal var needsTransitionFinalization = false
@@ -113,6 +131,28 @@ internal class ScreensCoordinatorLayout(
 
     override fun shouldDelayChildPressedState(): Boolean = fragment.screen.usesFormSheetPresentation()
 
+    override fun onMeasure(
+        widthMeasureSpec: Int,
+        heightMeasureSpec: Int,
+    ) {
+        if (fragment.screen.usesFormSheetPresentation()) {
+            if (isAttachedToWindow) posture.start()
+            val origin = IntArray(2).also { getLocationInWindow(it) }
+            val placement =
+                FormSheetPlacement.resolve(
+                    MeasureSpec.getSize(widthMeasureSpec),
+                    resources.getDimensionPixelSize(com.google.android.material.R.dimen.material_bottom_sheet_max_width),
+                    posture.hingeLeft?.minus(origin[0]),
+                    resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT,
+                )
+            val params = fragment.screen.layoutParams as LayoutParams
+            params.width = placement.width
+            params.leftMargin = placement.left
+            params.gravity = Gravity.LEFT
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
     override fun onLayout(
         changed: Boolean,
         l: Int,
@@ -123,7 +163,10 @@ internal class ScreensCoordinatorLayout(
         super.onLayout(changed, l, t, r, b)
 
         if (fragment.screen.usesFormSheetPresentation()) {
-            fragment.screen.onBottomSheetBehaviorDidLayout(changed)
+            val widthChanged = fragment.screen.width != lastSheetWidth
+            lastSheetWidth = fragment.screen.width
+            // The hinge can resize the sheet without resizing its workspace-sized coordinator.
+            fragment.screen.onBottomSheetBehaviorDidLayout(changed || widthChanged)
         }
     }
 }

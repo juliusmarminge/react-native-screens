@@ -1,7 +1,11 @@
 import { by, device, element, expect, waitFor } from 'detox';
-import { describeIfiOS, selectSingleFeatureTestsScreen } from '../../e2e-utils';
+import { selectSingleFeatureTestsScreen } from '@e2e/app/test-screen-navigation';
+import { describeIfIOS, isIOSVersionAtLeast } from '@e2e/framework/platform';
 
 const searchField = () => element(by.type('UISearchTextField'));
+// UIKit's round button that closes integrated search on iOS 26 and newer.
+const closeIntegratedSearch = () => element(by.label('close'));
+const itIfIOS26 = isIOSVersionAtLeast('26.0') ? it : it.skip;
 
 async function tapControl(id: string) {
   await element(by.id('search-controls')).scrollTo('top');
@@ -16,7 +20,7 @@ async function expectUnfocused() {
   await expect(searchField()).not.toBeFocused();
 }
 
-describeIfiOS('Stack search bar (iOS)', () => {
+describeIfIOS('Stack search bar (iOS)', () => {
   beforeEach(async () => {
     await device.reloadReactNative();
     await selectSingleFeatureTestsScreen(
@@ -56,6 +60,33 @@ describeIfiOS('Stack search bar (iOS)', () => {
     await expectUnfocused();
     await expect(element(by.id('search-cancel'))).toHaveText('Cancelled: 1');
     await expect(searchField()).toHaveText('');
+  });
+
+  itIfIOS26('reports closing integrated search as a cancel', async () => {
+    await tapControl('toggle-placement');
+    await tapControl('toggle-placement');
+    await expect(element(by.text('Placement: integratedButton'))).toExist();
+    await tapControl('focus-search');
+    await searchField().typeText('query');
+    await searchField().tapReturnKey();
+    await expect(element(by.id('search-submit'))).toHaveText(
+      'Submitted: query',
+    );
+    // Return keeps the field focused; apps that submit blur it themselves.
+    await tapControl('blur-search');
+    await expectUnfocused();
+    await expect(searchField()).toHaveText('query');
+    await expect(element(by.id('search-cancel'))).toHaveText('Cancelled: 0');
+    await tapControl('focus-search');
+    await closeIntegratedSearch().tap();
+    await expect(element(by.id('search-cancel'))).toHaveText('Cancelled: 1');
+    await expect(element(by.id('search-text'))).toHaveText('Text: (empty)');
+    await tapControl('focus-search');
+    await searchField().typeText('kept');
+    await tapControl('push-details');
+    await element(by.id('pop-details')).tap();
+    await expect(element(by.id('search-cancel'))).toHaveText('Cancelled: 1');
+    await expect(element(by.id('search-text'))).toHaveText('Text: kept');
   });
 
   it('runs text and cancel-button ref commands without focusing search', async () => {

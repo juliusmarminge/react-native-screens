@@ -20,7 +20,7 @@ if (run('git', ['status', '--porcelain']).trim()) {
 }
 run('git', ['merge-base', '--is-ancestor', pkg.t3Fork.upstreamCommit, 'HEAD']);
 const provenance = {
-  repository: 'https://github.com/juliusmarminge/react-native-screens',
+  repository: 'https://github.com/pingdotgg/react-native-screens',
   commit: run('git', ['rev-parse', 'HEAD']).trim(),
   upstreamCommit: pkg.t3Fork.upstreamCommit,
   version: pkg.version,
