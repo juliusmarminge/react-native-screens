@@ -35,6 +35,7 @@
    * avoiding crashes when certain columns are collapsed or hidden.
    */
   NSMutableSet<NSNumber *> *_visibleColumns;
+  BOOL _hidesInspectorWithDisplayModeChange;
 
   /** Controllers of the columns, in column order, alive for the host's lifetime. */
   NSMutableArray<RNSSplitColumnController *> *_columnControllers;
@@ -219,13 +220,41 @@
 
 #pragma mark - Public setters
 
+- (void)hideInspectorWithNextDisplayModeChange
+{
+  _hidesInspectorWithDisplayModeChange = YES;
+  // The transition normally starts within a frame; never leave the inspector up if it does not.
+  __weak auto weakSelf = self;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    [weakSelf hideDeferredInspectorAlongside:nil];
+  });
+}
+
+- (void)hideDeferredInspectorAlongside:(nullable id<UIViewControllerTransitionCoordinator>)coordinator
+{
+  if (!_hidesInspectorWithDisplayModeChange) {
+    return;
+  }
+  _hidesInspectorWithDisplayModeChange = NO;
+  if (coordinator == nil) {
+    [self toggleSplitViewInspector:NO];
+    return;
+  }
+  __weak auto weakSelf = self;
+  [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+    [weakSelf toggleSplitViewInspector:NO];
+  }
+                               completion:nil];
+}
+
 - (void)toggleSplitViewInspector:(BOOL)showInspector
 {
 #if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
   if (@available(iOS 26.0, *)) {
     if (showInspector) {
+      _hidesInspectorWithDisplayModeChange = NO;
       [self maybeShowInspector];
-    } else {
+    } else if (!_hidesInspectorWithDisplayModeChange) {
       [self maybeHideInspector];
     }
   }
@@ -463,6 +492,7 @@
   if (self.displayMode != displayMode) {
     [self.eventsDelegate splitHostController:self willChangeDisplayModeFrom:self.displayMode to:displayMode];
   }
+  [self hideDeferredInspectorAlongside:svc.transitionCoordinator];
 
   __weak auto weakSelf = self;
   void (^notifyColumnPositioningDidChange)(void) = ^{

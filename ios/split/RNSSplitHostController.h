@@ -88,6 +88,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)toggleSplitViewInspector:(BOOL)showInspector;
 
+/// Defers hiding the inspector into the display mode transition that is about to start.
+- (void)hideInspectorWithNextDisplayModeChange;
+
 /**
  * @brief Programmatically shows a specific column identified by its string name.
  *

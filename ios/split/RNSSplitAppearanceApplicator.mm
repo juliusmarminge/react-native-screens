@@ -57,6 +57,21 @@ static UISplitViewControllerDisplayMode RNSSplitDisplayModeForSize(
 {
   __weak auto weakSelf = self;
 
+  // A sidebar returning into a closing inspector's room: UIKit first lays the columns out at the start of the
+  // sidebar's transition. Without the inspector there, the secondary column's safe area briefly spans the whole
+  // window, so the inspector leaves inside that transition instead.
+  if (!provider.showInspector) {
+    const auto displayModeBefore = splitHostController.preferredDisplayMode;
+    [appearanceCoordinator updateIfNeeded:RNSSplitAppearanceUpdateFlagsDisplayModeUpdate
+                           updateCallback:^{
+                             [weakSelf updateSplitViewDisplayModeFor:provider withController:splitHostController];
+                           }];
+    if (splitHostController.preferredDisplayMode != displayModeBefore &&
+        splitHostController.preferredDisplayMode != UISplitViewControllerDisplayModeSecondaryOnly) {
+      [splitHostController hideInspectorWithNextDisplayModeChange];
+    }
+  }
+
   [appearanceCoordinator updateIfNeeded:RNSSplitAppearanceUpdateFlagsGeneralUpdate
                          updateCallback:^{
                            auto strongSelf = weakSelf;
