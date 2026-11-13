@@ -1,7 +1,6 @@
 package com.swmansion.rnscreens.legacy.stack.views
 
 import android.content.Context
-import android.content.res.Configuration
 import android.view.Gravity
 import android.view.WindowInsets
 import android.view.animation.Animation
@@ -143,7 +142,6 @@ internal class ScreensCoordinatorLayout(
                     MeasureSpec.getSize(widthMeasureSpec),
                     resources.getDimensionPixelSize(com.google.android.material.R.dimen.material_bottom_sheet_max_width),
                     posture.hingeLeft?.minus(origin[0]),
-                    resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT,
                 )
             val params = fragment.screen.layoutParams as LayoutParams
             params.width = placement.width

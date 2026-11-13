@@ -2,7 +2,6 @@ package com.swmansion.rnscreens.core.modals.formsheet.dialog
 
 import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -116,7 +115,6 @@ internal class FormSheetDialog(
                         width,
                         context.resources.getDimensionPixelSize(com.google.android.material.R.dimen.material_bottom_sheet_max_width),
                         posture.hingeLeft,
-                        context.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT,
                     )
                 val params = sheet.layoutParams as CoordinatorLayout.LayoutParams
                 params.width = placement.width
