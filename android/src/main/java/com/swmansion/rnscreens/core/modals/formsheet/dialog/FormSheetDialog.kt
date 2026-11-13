@@ -1,15 +1,20 @@
 package com.swmansion.rnscreens.core.modals.formsheet.dialog
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.WindowCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.swmansion.rnscreens.core.modals.formsheet.FormSheetPlacement
+import com.swmansion.rnscreens.core.modals.formsheet.FormSheetPostureObserver
 
 /**
  * A custom BottomSheetDialog override used to render the FormSheet native component.
@@ -20,7 +25,15 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
  */
 internal class FormSheetDialog(
     context: Context,
+    activityProvider: () -> Activity?,
 ) : BottomSheetDialog(context) {
+    private val posture =
+        FormSheetPostureObserver(activityProvider) {
+            // A posture change keeps the window bounds, so invalidate both measurement branches.
+            availableHeightProvider.requestLayout()
+            findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.requestLayout()
+        }
+
     internal fun interface CancelRequestInterceptor {
         /**
          * Invoked in place of the dialog's default cancellation whenever an interceptor is attached.
@@ -53,7 +66,13 @@ internal class FormSheetDialog(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
+        posture.start()
         forceEdgeToEdge()
+    }
+
+    override fun onDetachedFromWindow() {
+        posture.stop()
+        super.onDetachedFromWindow()
     }
 
     override fun cancel() {
@@ -87,7 +106,23 @@ internal class FormSheetDialog(
 
     private fun setupBottomSheetHeight() {
         val bottomSheetView = findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet)
-        bottomSheetView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
+        bottomSheetView?.let { sheet ->
+            sheet.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+            availableHeightProvider.onAvailableWidthMeasured = { width ->
+                if (isShowing) posture.start()
+                val placement =
+                    FormSheetPlacement.resolve(
+                        width,
+                        context.resources.getDimensionPixelSize(com.google.android.material.R.dimen.material_bottom_sheet_max_width),
+                        posture.hingeLeft,
+                    )
+                val params = sheet.layoutParams as CoordinatorLayout.LayoutParams
+                params.width = placement.width
+                params.leftMargin = placement.left
+                params.gravity = Gravity.LEFT
+                behavior.maxWidth = placement.width
+            }
+        }
     }
 
     private fun installAvailableHeightProvider() {
@@ -105,7 +140,7 @@ internal class FormSheetDialog(
         contentParent.addView(
             availableHeightProvider,
             0,
-            FrameLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT),
+            FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT),
         )
     }
 

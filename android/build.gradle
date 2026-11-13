@@ -217,6 +217,8 @@ repositories {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'androidx.window:window:1.5.1'
     implementation 'com.facebook.react:react-native:+'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.fragment:fragment-ktx:1.8.9'

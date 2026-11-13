@@ -20,7 +20,7 @@ import kotlin.properties.Delegates
 class FormSheetDialogManager(
     context: Context,
     private val contentView: View,
-    activityProvider: () -> Activity? = { context.findActivity() },
+    private val activityProvider: () -> Activity? = { context.findActivity() },
 ) {
     private var formSheetConfig = FormSheetConfig()
 
@@ -75,7 +75,7 @@ class FormSheetDialogManager(
         }
 
     private fun createPresentation(): FormSheetPresentation =
-        FormSheetPresentation(themedContext, container, presentationCallbacks).also {
+        FormSheetPresentation(themedContext, container, presentationCallbacks, activityProvider).also {
             it.applyInitialConfig(formSheetConfig, lastContentHeight)
         }
 

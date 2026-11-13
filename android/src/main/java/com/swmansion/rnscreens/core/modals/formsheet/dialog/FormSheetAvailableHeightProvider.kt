@@ -24,6 +24,8 @@ internal class FormSheetAvailableHeightProvider(
         fun onAvailableHeightMeasured(height: Int)
     }
 
+    internal var onAvailableWidthMeasured: ((Int) -> Unit)? = null
+
     internal var availableHeightListener: OnAvailableHeightMeasuredListener? = null
 
     init {
@@ -35,6 +37,10 @@ internal class FormSheetAvailableHeightProvider(
         widthMeasureSpec: Int,
         heightMeasureSpec: Int,
     ) {
+        val width = MeasureSpec.getSize(widthMeasureSpec)
+        if (MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED && width > 0) {
+            onAvailableWidthMeasured?.invoke(width)
+        }
         val height = MeasureSpec.getSize(heightMeasureSpec)
         if (MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.UNSPECIFIED && height > 0) {
             availableHeightListener?.onAvailableHeightMeasured(height)
